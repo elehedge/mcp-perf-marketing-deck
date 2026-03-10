@@ -1,0 +1,2031 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>MCP가 바꾸는 퍼포먼스 마케팅 v2</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
+
+    :root {
+      --bg: #0c1222;
+      --bg-slide: #111827;
+      --bg-card: rgba(255,255,255,0.04);
+      --bg-card-hover: rgba(255,255,255,0.07);
+      --ink: #f0f4fc;
+      --ink-secondary: #94a3b8;
+      --muted: #64748b;
+      --line: rgba(255,255,255,0.08);
+      --line-strong: rgba(255,255,255,0.14);
+      --cyan: #2dd4bf;
+      --cyan-dim: rgba(45,212,191,0.10);
+      --cyan-mid: rgba(45,212,191,0.20);
+      --blue: #60a5fa;
+      --blue-dim: rgba(96,165,250,0.10);
+      --amber: #fbbf24;
+      --amber-dim: rgba(251,191,36,0.10);
+      --rose: #fb7185;
+      --rose-dim: rgba(251,113,133,0.10);
+      --violet: #a78bfa;
+      --violet-dim: rgba(167,139,250,0.10);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --radius-xs: 6px;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{width:100%;height:100%;overflow:hidden}
+    body{font-family:"Noto Sans KR",sans-serif;color:var(--ink);background:var(--bg)}
+
+    /* ─── Topbar ─── */
+    .topbar{position:fixed;inset:0 0 auto 0;height:48px;display:flex;justify-content:space-between;align-items:center;padding:0 24px;z-index:80;background:rgba(12,18,34,0.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+    .topbar-left{display:flex;align-items:center;gap:10px}
+    .topbar-icon{width:28px;height:28px;border-radius:8px;background:var(--cyan-dim);border:1px solid var(--cyan-mid);display:flex;align-items:center;justify-content:center}
+    .topbar-icon svg{width:16px;height:16px;color:var(--cyan)}
+    .topbar-title{font-family:"Outfit",sans-serif;font-size:0.82rem;font-weight:600;color:var(--ink)}
+    .topbar-pages{font-size:0.72rem;color:var(--muted);font-family:"JetBrains Mono",monospace}
+    .topbar-right{display:flex;align-items:center;gap:12px}
+
+    /* ─── Slide System ─── */
+    #deck{position:relative;width:100vw;height:100vh}
+    .slide{position:absolute;inset:48px 0 0;display:flex;align-items:center;justify-content:center;padding:32px 56px;opacity:0;visibility:hidden;transform:translateY(10px);pointer-events:none;transition:opacity 0.4s ease,transform 0.4s ease,visibility 0s 0.4s}
+    .slide.active{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto;transition:opacity 0.4s ease,transform 0.4s ease,visibility 0s 0s}
+    .slide-inner{width:100%;max-width:1100px;position:relative}
+
+    /* ─── Page Counter ─── */
+
+    /* ─── Slide Header (dual-language) ─── */
+    .slide-header{margin-bottom:28px}
+    .slide-header h2{font-family:"Outfit",sans-serif;font-size:clamp(1.4rem,2.4vw,1.9rem);font-weight:800;color:var(--ink);line-height:1.25}
+    .slide-header h2 .en{font-weight:500;color:var(--muted);font-size:0.85em;margin-left:12px}
+    .slide-header h2 .sep{color:var(--line-strong);margin:0 10px;font-weight:300}
+    .slide-header::after{content:"";display:block;width:48px;height:3px;background:var(--cyan);border-radius:2px;margin-top:14px}
+    .slide-header.no-line::after{display:none}
+
+    /* ─── Cover Slide ─── */
+    .cover-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:6px;background:var(--cyan-dim);border:1px solid var(--cyan-mid);font-family:"JetBrains Mono",monospace;font-size:0.72rem;font-weight:600;color:var(--cyan);letter-spacing:1px;margin-bottom:24px}
+    .cover-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--cyan)}
+    .cover-title{font-family:"Outfit",sans-serif;font-size:clamp(2.8rem,6vw,5rem);font-weight:900;line-height:1.05;letter-spacing:-0.03em;color:var(--ink)}
+    .cover-title .accent{color:var(--cyan)}
+    .cover-sub{margin-top:20px;padding-left:16px;border-left:3px solid var(--cyan);font-size:1.05rem;color:var(--ink-secondary);line-height:1.5}
+    .cover-meta{display:flex;gap:32px;margin-top:28px;padding-top:20px;border-top:1px solid var(--line)}
+    .cover-meta dt{font-family:"JetBrains Mono",monospace;font-size:0.62rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:2px}
+    .cover-meta dd{font-size:0.88rem;font-weight:600;color:var(--ink)}
+    .cover-geo{position:absolute;right:-40px;top:50%;transform:translateY(-50%);width:440px;height:440px;opacity:0.08}
+    .cover-geo circle{fill:none;stroke:var(--cyan);stroke-width:1.5}
+
+    /* ─── PART Divider ─── */
+    .part-divider{display:grid;grid-template-columns:0.8fr 1.2fr;gap:60px;align-items:center;min-height:calc(100vh - 120px)}
+    .part-left{text-align:left}
+    .part-section-badge{display:inline-block;padding:4px 12px;border-radius:4px;background:var(--cyan-dim);border:1px solid var(--cyan-mid);font-family:"JetBrains Mono",monospace;font-size:0.68rem;font-weight:600;color:var(--cyan);letter-spacing:2px;margin-bottom:16px}
+    .part-label{font-family:"Outfit",sans-serif;font-size:clamp(4rem,8vw,7rem);font-weight:900;color:rgba(255,255,255,0.06);line-height:0.9;letter-spacing:-0.04em}
+    .part-num{font-family:"Outfit",sans-serif;font-size:clamp(5rem,10vw,9rem);font-weight:900;color:var(--cyan);line-height:0.85;letter-spacing:-0.04em}
+    .part-bar{width:40px;height:3px;background:var(--cyan);border-radius:2px;margin-top:20px}
+    .part-right h2{font-family:"Outfit",sans-serif;font-size:clamp(1.6rem,3vw,2.4rem);font-weight:800;color:var(--ink);line-height:1.2;margin-bottom:6px}
+    .part-right .part-sub{font-size:1rem;color:var(--muted);margin-bottom:28px}
+    .part-agenda{display:flex;flex-direction:column;gap:10px}
+    .part-agenda-item{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:var(--radius-sm);background:var(--bg-card);border:1px solid var(--line);transition:border-color 0.2s}
+    .part-agenda-item:hover{border-color:var(--cyan-mid)}
+    .part-agenda-num{font-family:"JetBrains Mono",monospace;font-size:0.82rem;font-weight:600;color:var(--cyan);min-width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;background:var(--cyan-dim);border:1px solid var(--cyan-mid)}
+    .part-agenda-text{flex:1}
+    .part-agenda-text strong{display:block;font-size:0.88rem;font-weight:600;color:var(--ink)}
+    .part-agenda-text span{font-size:0.72rem;color:var(--muted)}
+    .part-footer{position:absolute;bottom:20px;right:0;font-family:"JetBrains Mono",monospace;font-size:0.62rem;color:rgba(255,255,255,0.15);letter-spacing:2px;display:flex;align-items:center;gap:8px}
+
+    /* ─── Cards ─── */
+    .card{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;transition:border-color 0.2s}
+    .card:hover{border-color:var(--line-strong)}
+    .card h3{font-family:"Outfit",sans-serif;font-size:1rem;font-weight:700;margin-bottom:6px;color:var(--ink)}
+    .card p{font-size:0.85rem;line-height:1.55;color:var(--ink-secondary)}
+    .card-focus{border-color:var(--cyan-mid) !important;background:rgba(45,212,191,0.04) !important;position:relative}
+    .card-focus::before{content:"OUR FOCUS";position:absolute;top:-10px;left:50%;transform:translateX(-50%);padding:2px 10px;border-radius:4px;background:var(--cyan);color:var(--bg);font-family:"JetBrains Mono",monospace;font-size:0.6rem;font-weight:700;letter-spacing:1px}
+
+    .card-grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+    .card-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .card-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .card-grid-5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+
+    /* ─── Icon Circle ─── */
+    .ic{display:inline-flex;align-items:center;justify-content:center;border-radius:10px;font-family:"JetBrains Mono",monospace;font-weight:700;flex-shrink:0}
+    .ic-sm{width:32px;height:32px;font-size:0.75rem}
+    .ic-md{width:40px;height:40px;font-size:0.85rem}
+    .ic-lg{width:52px;height:52px;font-size:1.1rem}
+
+    /* ─── Step Cards ─── */
+    .step-badge{display:inline-block;padding:3px 10px;border-radius:4px;background:var(--cyan-dim);border:1px solid var(--cyan-mid);font-family:"JetBrains Mono",monospace;font-size:0.65rem;font-weight:600;color:var(--cyan);letter-spacing:1px;margin-bottom:12px}
+    .step-arrow{display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:var(--muted);opacity:0.4}
+
+    /* ─── 2-Column Compare ─── */
+    .compare-2col{display:grid;grid-template-columns:1fr 1fr;gap:0}
+    .compare-side{padding:24px}
+    .compare-side.left{border-right:1px solid var(--line)}
+    .compare-side .side-header{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+    .compare-side .side-header .ic{margin-right:4px}
+    .compare-side .side-header h3{font-family:"Outfit",sans-serif;font-size:1.1rem;font-weight:700}
+    .compare-side .side-header span{font-size:0.78rem}
+    .compare-item{padding:14px 16px;border-radius:var(--radius-sm);background:var(--bg-card);border:1px solid var(--line);margin-bottom:10px;display:flex;align-items:center;gap:12px}
+    .compare-item .label{font-family:"JetBrains Mono",monospace;font-size:0.65rem;font-weight:600;letter-spacing:1px;min-width:56px}
+    .compare-item .text{font-size:0.85rem;color:var(--ink)}
+
+    /* ─── Conclusion Bar ─── */
+    .conclusion-bar{margin-top:24px;padding:14px 20px;border-radius:var(--radius-sm);background:var(--cyan-dim);border:1px solid var(--cyan-mid);display:flex;align-items:center;gap:10px;font-size:0.88rem;color:var(--cyan);font-weight:500}
+    .conclusion-bar.warning{background:var(--amber-dim);border-color:rgba(251,191,36,0.2);color:var(--amber)}
+    .conclusion-bar.danger{background:var(--rose-dim);border-color:rgba(251,113,133,0.2);color:var(--rose)}
+    .conclusion-bar svg{width:18px;height:18px;flex-shrink:0}
+
+    /* ─── Reference Links ─── */
+    .ref-link{display:block;padding:6px 8px;border-radius:4px;background:var(--bg-card);color:var(--ink-secondary);text-decoration:none;transition:background 0.15s,color 0.15s;font-size:0.72rem}
+    .ref-link:hover{background:rgba(45,212,191,0.08);color:var(--cyan)}
+    .ref-link strong{color:var(--ink);font-weight:600}
+    .ref-link .ref-url{opacity:0.5;font-size:0.62rem;font-family:"JetBrains Mono",monospace;display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+    /* ─── Cost Indicator ─── */
+    .cost-dots{display:flex;gap:3px;align-items:center}
+    .cost-dots .dot{width:6px;height:6px;border-radius:50%;background:var(--muted);opacity:0.3}
+    .cost-dots .dot.active{opacity:1}
+    .cost-dots.low .dot.active{background:var(--cyan)}
+    .cost-dots.mid .dot.active{background:var(--amber)}
+    .cost-dots.high .dot.active{background:var(--rose)}
+
+    /* ─── Table ─── */
+    .cmp-table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;font-size:0.78rem;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line)}
+    .cmp-table th{padding:10px 12px;background:rgba(255,255,255,0.04);color:var(--muted);font-weight:600;text-align:center;border-bottom:1px solid var(--line);font-family:"JetBrains Mono",monospace;font-size:0.7rem;letter-spacing:0.5px}
+    .cmp-table th:first-child{text-align:left;width:22%}
+    .cmp-table td{padding:10px 12px;border-bottom:1px solid var(--line);color:var(--ink-secondary);text-align:center}
+    .cmp-table td:first-child{text-align:left}
+    .cmp-table tr:last-child td{border-bottom:none}
+    .cmp-table .highlight{background:rgba(45,212,191,0.06)}
+    .cmp-table .check{color:var(--cyan);font-weight:700;text-align:center}
+    .cmp-table .cross{color:var(--muted);opacity:0.4;text-align:center}
+    /* ─── Level Dots ─── */
+    .lvl{display:inline-flex;gap:3px;align-items:center}
+    .lvl .d{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.06)}
+    .lvl .d.on{background:var(--cyan);border-color:var(--cyan)}
+    .lvl.rose .d.on{background:var(--rose);border-color:var(--rose)}
+    .lvl.amber .d.on{background:var(--amber);border-color:var(--amber)}
+    .lvl-label{font-size:0.62rem;margin-left:5px;opacity:0.7}
+
+    /* ─── Code Block ─── */
+    pre.code-block{background:rgba(0,0,0,0.35);border:1px solid var(--line);border-radius:var(--radius-sm);padding:16px 20px;font-family:"JetBrains Mono",monospace;font-size:0.72rem;color:var(--ink);line-height:1.7;overflow-x:auto}
+    pre.code-block .comment{color:var(--muted)}
+    pre.code-block .key{color:var(--cyan)}
+    pre.code-block .string{color:var(--amber)}
+
+    /* ─── Flow (horizontal steps) ─── */
+    .flow-h{display:flex;align-items:stretch;gap:0;margin-top:20px}
+    .flow-step{flex:1;padding:16px;background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius-sm);text-align:center}
+    .flow-step strong{display:block;font-size:0.88rem;margin-top:6px}
+    .flow-step p{font-size:0.75rem;color:var(--muted);margin-top:4px}
+    .flow-arrow{display:flex;align-items:center;padding:0 6px;font-size:1.2rem;color:var(--cyan);opacity:0.5}
+
+    /* ─── Animations ─── */
+    .stagger{opacity:0;transform:translateY(14px);transition:opacity 0.5s ease,transform 0.5s ease}
+    .slide.active .stagger{opacity:1;transform:translateY(0)}
+    .slide.active .stagger:nth-child(1){transition-delay:0.05s}
+    .slide.active .stagger:nth-child(2){transition-delay:0.12s}
+    .slide.active .stagger:nth-child(3){transition-delay:0.19s}
+    .slide.active .stagger:nth-child(4){transition-delay:0.26s}
+    .slide.active .stagger:nth-child(5){transition-delay:0.33s}
+    .slide.active .stagger:nth-child(6){transition-delay:0.40s}
+
+    /* ─── Keyboard Hint ─── */
+    .kb-hint{position:fixed;bottom:16px;right:24px;font-family:"JetBrains Mono",monospace;font-size:0.62rem;color:var(--muted);opacity:0.4;z-index:90}
+    .kb-hint kbd{padding:2px 6px;border-radius:3px;border:1px solid var(--line);background:var(--bg-card);margin:0 2px}
+
+    /* ─── Timeline ─── */
+    .timeline{display:flex;flex-direction:column;gap:0}
+    .tl-item{display:grid;grid-template-columns:72px 20px 1fr;gap:0;align-items:start;min-height:42px}
+    .tl-date{font-family:"JetBrains Mono",monospace;font-size:0.7rem;font-weight:500;color:var(--muted);text-align:right;padding-top:2px;padding-right:10px}
+    .tl-dot-wrap{display:flex;flex-direction:column;align-items:center;height:100%}
+    .tl-dot{width:10px;height:10px;border-radius:50%;background:var(--cyan);flex-shrink:0;margin-top:4px}
+    .tl-line{width:1.5px;flex:1;background:var(--line);min-height:20px}
+    .tl-body{padding:0 0 14px 10px;font-size:0.8rem;line-height:1.5}
+    .tl-body strong{color:var(--ink);font-weight:600;font-size:0.82rem}
+    .tl-body span{color:var(--muted);font-size:0.72rem}
+
+    /* ─── DIKW Pyramid ─── */
+    .dikw-pyramid{display:flex;flex-direction:column;align-items:center;gap:4px;margin:20px 0}
+    .dikw-level{display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);font-weight:600;transition:all 0.3s}
+
+    /* ─── SVG Wrap ─── */
+    .svg-wrap{width:100%;overflow:visible}
+    .svg-wrap svg{width:100%;height:auto}
+
+    /* ─── Utility ─── */
+    .text-cyan{color:var(--cyan)}
+    .text-blue{color:var(--blue)}
+    .text-amber{color:var(--amber)}
+    .text-rose{color:var(--rose)}
+    .text-violet{color:var(--violet)}
+    .text-muted{color:var(--muted)}
+    .mt-sm{margin-top:12px}
+    .mt-md{margin-top:20px}
+    .mt-lg{margin-top:32px}
+  </style>
+</head>
+<body>
+
+  <!-- ─── Topbar ─── -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+      <span class="topbar-title">MCP가 바꾸는 퍼포먼스 마케팅</span>
+      <span class="topbar-pages"><span id="totalPages"></span> pages total</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-pages" id="navCounter"></span>
+    </div>
+  </header>
+
+  <div id="deck">
+
+    <!-- ══════════════ COVER ══════════════ -->
+    <section class="slide active">
+      <div class="slide-inner" style="position:relative">
+        <div class="stagger"><span class="cover-badge"><span class="dot"></span> PME SESSION</span></div>
+        <h1 class="cover-title stagger">MCP가 바꾸는<br/><span class="accent">퍼포먼스</span><br/>마케팅</h1>
+        <div class="cover-sub stagger">MCP가 뭐길래?<br/>MCP의 등장부터 사용법, 그리고 한계까지</div>
+        <div class="cover-meta stagger">
+          <dl><dt>PRESENTER</dt><dd>이승헌</dd></dl>
+          <dl><dt>DATE</dt><dd style="font-family:'JetBrains Mono',monospace">2026.03.10</dd></dl>
+        </div>
+        <svg class="cover-geo" viewBox="0 0 440 440"><circle cx="220" cy="220" r="200"/><circle cx="220" cy="220" r="140"/><circle cx="220" cy="220" r="80"/><line x1="20" y1="220" x2="420" y2="220" stroke="currentColor" stroke-width="0.5" opacity="0.3"/><line x1="220" y1="20" x2="220" y2="420" stroke="currentColor" stroke-width="0.5" opacity="0.3"/></svg>
+      </div>
+    </section>
+
+    <!-- ══════════════ AGENDA ══════════════ -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="slide-header stagger">
+          <h2>오늘의 세션 흐름<span class="sep">|</span><span class="en">Agenda</span></h2>
+        </div>
+        <p class="stagger" style="color:var(--ink-secondary);font-size:0.92rem;margin-bottom:28px">MCP의 등장 &rarr; 고객 관점 &rarr; 사용법 + 실전 &rarr; 경쟁 현황 &rarr; 한계와 대안</p>
+        <div class="card-grid-5 stagger">
+          <div class="card" style="border-top:3px solid var(--blue)">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;font-weight:600;color:var(--blue);letter-spacing:1px;margin-bottom:8px">PART 01</div>
+            <h3 style="font-size:0.88rem">MCP의 등장</h3>
+            <p>LLM의 한계와 MCP 등장</p>
+          </div>
+          <div class="card" style="border-top:3px solid var(--violet)">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;font-weight:600;color:var(--violet);letter-spacing:1px;margin-bottom:8px">PART 02</div>
+            <h3 style="font-size:0.88rem">Customer</h3>
+            <p>DIKW 프레임워크로<br/>고객의 진짜 니즈 이해</p>
+          </div>
+          <div class="card" style="border-top:3px solid var(--cyan)">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;font-weight:600;color:var(--cyan);letter-spacing:1px;margin-bottom:8px">PART 03</div>
+            <h3 style="font-size:0.88rem">사용법 + 실전</h3>
+            <p>설치부터 실전 시나리오</p>
+          </div>
+          <div class="card" style="border-top:3px solid var(--rose)">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;font-weight:600;color:var(--rose);letter-spacing:1px;margin-bottom:8px">PART 04</div>
+            <h3 style="font-size:0.88rem">경쟁 현황</h3>
+            <p>AppsFlyer, Singular,<br/>Kochava 비교</p>
+          </div>
+          <div class="card" style="border-top:3px solid var(--amber)">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;font-weight:600;color:var(--amber);letter-spacing:1px;margin-bottom:8px">PART 05</div>
+            <h3 style="font-size:0.88rem">is MCP Dead?</h3>
+            <p>한계, 대안 기술,<br/>그래도 MCP인 이유</p>
+          </div>
+        </div>
+        <h3 class="stagger" style="font-size:0.85rem;font-weight:700;margin-top:28px;margin-bottom:10px;color:var(--ink)">Session Objectives</h3>
+        <div class="stagger" style="display:flex;gap:8px;flex-wrap:wrap">
+          <div style="flex:1;min-width:200px;padding:10px 14px;border-radius:var(--radius-sm);background:var(--cyan-dim);border:1px solid var(--cyan-mid);font-size:0.78rem;color:var(--cyan)"><strong>1.</strong> MCP가 무엇인지 설명할 수 있다</div>
+          <div style="flex:1;min-width:200px;padding:10px 14px;border-radius:var(--radius-sm);background:var(--blue-dim);border:1px solid rgba(96,165,250,0.2);font-size:0.78rem;color:var(--blue)"><strong>2.</strong> 경쟁사의 MCP 현황이 어떤지 설명할 수 있다</div>
+          <div style="flex:1;min-width:200px;padding:10px 14px;border-radius:var(--radius-sm);background:var(--violet-dim);border:1px solid rgba(167,139,250,0.2);font-size:0.78rem;color:var(--violet)"><strong>3.</strong> MCP의 역할과 그 대안들을 비교하여 장단점을 설명할 수 있다</div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════╗ -->
+    <!-- ║          PART 01 — MCP History           ║ -->
+    <!-- ╚══════════════════════════════════════════╝ -->
+
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="part-divider">
+          <div class="part-left stagger">
+            <span class="part-section-badge">SECTION</span>
+            <div class="part-label">PART</div>
+            <div class="part-num">01</div>
+            <div class="part-bar"></div>
+          </div>
+          <div class="part-right stagger">
+            <h2>MCP History</h2>
+            <div class="part-sub">From LLM Limitations to Open Standard</div>
+            <div class="part-agenda">
+              <div class="part-agenda-item"><span class="part-agenda-num">01</span><div class="part-agenda-text"><strong>LLM이란?</strong><span>강력한 AI, 그런데…</span></div></div>
+              <div class="part-agenda-item"><span class="part-agenda-num">02</span><div class="part-agenda-text"><strong>LLM의 한계</strong><span>강력하지만 데이터가 없다</span></div></div>
+              <div class="part-agenda-item"><span class="part-agenda-num">03</span><div class="part-agenda-text"><strong>MCP의 등장</strong><span>AI의 USB-C, 16개월 만에 빅테크 확산</span></div></div>
+              <div class="part-agenda-item"><span class="part-agenda-num">04</span><div class="part-agenda-text"><strong>MCP의 역할</strong><span>Tools, Resources, Prompts 삼위일체</span></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="part-footer">PART 1 STRUCTURE</div>
+      </div>
+    </section>
+
+    <!-- ── LLM이란? ── -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="slide-header stagger">
+          <h2>LLM이란?<span class="sep">|</span><span class="en">Large Language Model</span></h2>
+        </div>
+        <p class="stagger" style="color:var(--ink-secondary);font-size:0.92rem;margin-bottom:24px">거대 언어 모델 &mdash; 방대한 텍스트를 학습해 <strong class="text-cyan">사람처럼 대화하고 추론하는 AI</strong></p>
+        <div class="card-grid-3 stagger">
+          <div class="card" style="text-align:center;padding:24px 18px">
+            <div class="ic ic-lg" style="background:var(--cyan-dim);color:var(--cyan);margin:0 auto 14px">&#128172;</div>
+            <h3>자연어 이해</h3>
+            <p style="margin-top:8px;font-size:0.82rem">사람의 질문을 이해하고<br/>맥락을 파악</p>
+            <div style="margin-top:12px;padding:6px 10px;border-radius:var(--radius-xs);background:var(--cyan-dim);font-size:0.72rem;color:var(--cyan)">&#10003; 뛰어남</div>
+          </div>
+          <div class="card" style="text-align:center;padding:24px 18px">
+            <div class="ic ic-lg" style="background:var(--blue-dim);color:var(--blue);margin:0 auto 14px">&#129504;</div>
+            <h3>추론 &amp; 생성</h3>
+            <p style="margin-top:8px;font-size:0.82rem">논리적 분석, 코드 작성,<br/>번역, 요약까지</p>
+            <div style="margin-top:12px;padding:6px 10px;border-radius:var(--radius-xs);background:var(--blue-dim);font-size:0.72rem;color:var(--blue)">&#10003; 뛰어남</div>
+          </div>
+          <div class="card" style="text-align:center;padding:24px 18px">
+            <div class="ic ic-lg" style="background:var(--violet-dim);color:var(--violet);margin:0 auto 14px">&#127760;</div>
+            <h3>범용성</h3>
+            <p style="margin-top:8px;font-size:0.82rem">마케팅, 개발, 분석 등<br/>거의 모든 영역에 적용</p>
+            <div style="margin-top:12px;padding:6px 10px;border-radius:var(--radius-xs);background:var(--violet-dim);font-size:0.72rem;color:var(--violet)">&#10003; 뛰어남</div>
+          </div>
+        </div>
+        <div class="conclusion-bar stagger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          이토록 강력한 LLM에도 &mdash; <strong>한 가지 빠진 퍼즐 조각</strong>이 있다
+        </div>
+      </div>
+    </section>
+
+    <!-- ── LLM의 한계 ── -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="slide-header stagger">
+          <h2>LLM의 한계<span class="sep">|</span><span class="en">The Missing Piece</span></h2>
+        </div>
+        <p class="stagger" style="color:var(--ink-secondary);font-size:0.92rem;margin-bottom:24px">AI Agent가 되려면 <strong>지식 + 데이터 + 도구</strong>가 필요하다 &mdash; LLM은 <strong class="text-rose">지식만 가지고 있다</strong></p>
+        <div class="card-grid-3 stagger">
+          <div class="card" style="text-align:center;padding:24px 18px">
+            <div class="ic ic-lg" style="background:var(--cyan-dim);color:var(--cyan);margin:0 auto 14px">&#129504;</div>
+            <h3>지식</h3>
+            <p style="margin-top:8px;font-size:0.82rem">방대한 텍스트를 학습한<br/>추론 능력과 언어 이해</p>
+            <div style="margin-top:12px;padding:6px 10px;border-radius:var(--radius-xs);background:var(--cyan-dim);font-size:0.72rem;color:var(--cyan)">&#10003; LLM이 가진 것</div>
+          </div>
+          <div class="card" style="text-align:center;padding:24px 18px;border-color:rgba(251,113,133,0.2)">
+            <div class="ic ic-lg" style="background:var(--rose-dim);color:var(--rose);margin:0 auto 14px">&#128202;</div>
+            <h3>데이터</h3>
+            <p style="margin-top:8px;font-size:0.82rem">실시간 캠페인 성과,<br/>내부 DB, 고객 정보</p>
+            <div style="margin-top:12px;padding:6px 10px;border-radius:var(--radius-xs);background:var(--rose-dim);font-size:0.72rem;color:var(--rose)">&#10007; 접근 불가</div>
+          </div>
+          <div class="card" style="text-align:center;padding:24px 18px;border-color:rgba(251,113,133,0.2)">
+            <div class="ic ic-lg" style="background:var(--rose-dim);color:var(--rose);margin:0 auto 14px">&#128295;</div>
+            <h3>도구</h3>
+            <p style="margin-top:8px;font-size:0.82rem">읽기, 쓰기, API 호출,<br/>파일 생성 등 실행 능력</p>
+            <div style="margin-top:12px;padding:6px 10px;border-radius:var(--radius-xs);background:var(--rose-dim);font-size:0.72rem;color:var(--rose)">&#10007; 실행 불가</div>
+          </div>
+        </div>
+        <div class="stagger" style="margin-top:18px;padding:16px 20px;border-radius:var(--radius-sm);border:1px solid var(--line);background:var(--bg-card);display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center">
+          <div style="text-align:center">
+            <div style="font-size:0.72rem;color:var(--muted);margin-bottom:4px">기존 방법</div>
+            <div style="font-size:0.82rem;color:var(--ink)">복사-붙여넣기, CSV 업로드,<br/>API 직접 호출 후 프롬프트에 붙이기</div>
+          </div>
+          <div style="font-size:1.6rem;color:var(--rose)">&#10007;</div>
+          <div style="text-align:center">
+            <div style="font-size:0.72rem;color:var(--muted);margin-bottom:4px">문제점</div>
+            <div style="font-size:0.82rem;color:var(--ink)">수동 작업, 컨텍스트 제한,<br/>데이터와 도구를 연결하는 표준 부재</div>
+          </div>
+        </div>
+        <div class="conclusion-bar danger stagger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          LLM에 데이터와 도구를 연결하는 표준이 없었다 &mdash; 그래서 MCP가 등장
+        </div>
+      </div>
+    </section>
+
+    <!-- ── MCP의 등장 ── -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="slide-header stagger">
+          <h2>MCP의 등장<span class="sep">|</span><span class="en">AI의 USB-C</span></h2>
+        </div>
+        <p class="stagger" style="color:var(--ink-secondary);font-size:0.92rem;margin-bottom:20px">AI 모델과 외부 데이터/도구를 연결하는 <strong class="text-cyan">개방형 표준 프로토콜</strong>. 16개월 만에 글로벌 빅테크로 급속 확산</p>
+        <div class="stagger" style="display:grid;grid-template-columns:1.3fr 1fr;gap:18px">
+          <div class="card" style="padding:18px">
+            <h3 style="font-size:0.82rem;margin-bottom:14px">채택 타임라인</h3>
+            <div class="timeline">
+              <div class="tl-item"><span class="tl-date">2024.11</span><div class="tl-dot-wrap"><span class="tl-dot"></span><span class="tl-line"></span></div><div class="tl-body"><strong>Anthropic, MCP 오픈소스 공개</strong></div></div>
+              <div class="tl-item"><span class="tl-date">2025.03</span><div class="tl-dot-wrap"><span class="tl-dot" style="background:var(--blue)"></span><span class="tl-line"></span></div><div class="tl-body"><strong>OpenAI, MCP 지원 선언</strong><br/><span>ChatGPT Apps (구 Connectors)</span></div></div>
+              <div class="tl-item"><span class="tl-date">2025.04</span><div class="tl-dot-wrap"><span class="tl-dot" style="background:var(--violet)"></span><span class="tl-line"></span></div><div class="tl-body"><strong>Google &middot; AWS, MCP 지원</strong><br/><span>Gemini CLI Extensions</span></div></div>
+              <div class="tl-item"><span class="tl-date">2025.12</span><div class="tl-dot-wrap"><span class="tl-dot" style="background:var(--amber)"></span><span class="tl-line"></span></div><div class="tl-body"><strong>Linux Foundation AAIF 이관</strong><br/><span>오픈 표준 확립, 8사 Platinum</span></div></div>
+              <div class="tl-item"><span class="tl-date" style="color:var(--cyan)">NOW</span><div class="tl-dot-wrap"><span class="tl-dot" style="width:14px;height:14px"></span></div><div class="tl-body"><strong class="text-cyan">MMP 업계 MCP 출시 경쟁</strong></div></div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div class="card" style="text-align:center;padding:14px"><div style="font-family:'Outfit',sans-serif;font-size:1.5rem;font-weight:800;color:var(--cyan)">16K+</div><div style="font-size:0.68rem;color:var(--muted)">등록 MCP 서버</div></div>
+            <div class="card" style="padding:16px">
+              <h3 style="font-size:0.82rem;margin-bottom:10px">비유: USB-C</h3>
+              <p style="font-size:0.78rem;line-height:1.6">USB-C 이전에는 기기마다 다른 케이블이 필요했듯,<br/>MCP 이전에는 AI마다 다른 연동 방법이 필요</p>
+              <div style="margin-top:10px;padding:8px 12px;border-radius:var(--radius-xs);background:var(--cyan-dim);font-size:0.75rem;color:var(--cyan)">하나의 MCP 서버 = 모든 AI 클라이언트에서 작동</div>
+            </div>
+            <div class="conclusion-bar" style="margin-top:0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M9 12l2 2 4-4"/></svg>
+              MCP = AI 생태계의 표준 연결 규격
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── MCP의 역할 ── -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="slide-header stagger">
+          <h2>MCP의 역할<span class="sep">|</span><span class="en">빠진 퍼즐 조각을 채우다</span></h2>
+        </div>
+        <p class="stagger" style="color:var(--ink-secondary);font-size:0.92rem;margin-bottom:24px">LLM에 없던 <strong>도구</strong>, <strong>자료</strong>, <strong>프리셋</strong>을 연결하는 3가지 핵심 기능</p>
+        <div class="card-grid-3 stagger">
+          <div class="card" style="border-top:3px solid var(--cyan);text-align:center;padding:24px 18px">
+            <div class="step-badge">CAPABILITY</div>
+            <div class="ic ic-lg" style="background:var(--cyan-dim);color:var(--cyan);margin:8px auto 12px;font-family:'Outfit',sans-serif;font-weight:900">T</div>
+            <h3>Tools <span class="text-muted" style="font-weight:400;font-size:0.82rem">도구</span></h3>
+            <p style="margin-top:8px;font-size:0.78rem">get_actuals_report<br/>get_revenue_report</p>
+            <div style="margin-top:12px;padding:8px;border-radius:var(--radius-xs);background:var(--bg-card);font-size:0.72rem;color:var(--muted)">AI가 호출할 수 있는 실행 가능한 함수<br/>데이터 조회, API 호출, 파일 생성 등</div>
+          </div>
+          <div class="card" style="border-top:3px solid var(--blue);text-align:center;padding:24px 18px">
+            <div class="step-badge" style="background:var(--blue-dim);border-color:rgba(96,165,250,0.2);color:var(--blue)">CAPABILITY</div>
+            <div class="ic ic-lg" style="background:var(--blue-dim);color:var(--blue);margin:8px auto 12px;font-family:'Outfit',sans-serif;font-weight:900">R</div>
+            <h3>Resources <span class="text-muted" style="font-weight:400;font-size:0.82rem">자료</span></h3>
+            <p style="margin-top:8px;font-size:0.78rem">이벤트 스키마 정의서<br/>어트리뷰션 모델 문서</p>
+            <div style="margin-top:12px;padding:8px;border-radius:var(--radius-xs);background:var(--bg-card);font-size:0.72rem;color:var(--muted)">AI에게 맥락을 제공하는 데이터 소스<br/>파일, 스키마, 문서 등을 읽기 전용으로 참조</div>
+          </div>
+          <div class="card" style="border-top:3px solid var(--violet);text-align:center;padding:24px 18px">
+            <div class="step-badge" style="background:var(--violet-dim);border-color:rgba(167,139,250,0.2);color:var(--violet)">CAPABILITY</div>
+            <div class="ic ic-lg" style="background:var(--violet-dim);color:var(--violet);margin:8px auto 12px;font-family:'Outfit',sans-serif;font-weight:900">P</div>
+            <h3>Prompts <span class="text-muted" style="font-weight:400;font-size:0.82rem">프리셋</span></h3>
+            <p style="margin-top:8px;font-size:0.78rem">/주간_성과_요약<br/>/이상_탐지_분석</p>
+            <div style="margin-top:12px;padding:8px;border-radius:var(--radius-xs);background:var(--bg-card);font-size:0.72rem;color:var(--muted)">미리 정의된 재사용 가능한 대화 템플릿<br/>사용자가 선택하면 구조화된 질문으로 실행</div>
+          </div>
+        </div>
+        <div class="conclusion-bar stagger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M9 12l2 2 4-4"/></svg>
+          도구(Tools)로 실행하고, 자료(Resources)로 맥락을 잡고, 프리셋(Prompts)으로 반복을 자동화
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════╗ -->
+    <!-- ║         PART 02 — Customer (DIKW)        ║ -->
+    <!-- ╚══════════════════════════════════════════╝ -->
+
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="part-divider">
+          <div class="part-left stagger">
+            <span class="part-section-badge">SECTION</span>
+            <div class="part-label">PART</div>
+            <div class="part-num">02</div>
+            <div class="part-bar"></div>
+          </div>
+          <div class="part-right stagger">
+            <h2>Customer</h2>
+            <div class="part-sub">What They Really Need</div>
+            <div class="part-agenda">
+              <div class="part-agenda-item"><span class="part-agenda-num">01</span><div class="part-agenda-text"><strong>고객의 현재</strong><span>Data &rarr; Information &rarr; Knowledge &rarr; Report</span></div></div>
+              <div class="part-agenda-item"><span class="part-agenda-num">02</span><div class="part-agenda-text"><strong>마케터의 하루</strong><span>DIKW 각 단계의 수작업 프로세스</span></div></div>
+              <div class="part-agenda-item"><span class="part-agenda-num">03</span><div class="part-agenda-text"><strong>진짜 원하는 것</strong><span>Wisdom &mdash; 의사결정을 위한 지혜</span></div></div>
+              <div class="part-agenda-item"><span class="part-agenda-num">04</span><div class="part-agenda-text"><strong>How to Get There</strong><span>MCP가 잇는 Data &rarr; Wisdom의 먼 거리</span></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="part-footer">PART 2 STRUCTURE</div>
+      </div>
+    </section>
+
+    <!-- ── 고객의 현재: DIKW ── -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="slide-header stagger">
+          <h2>고객의 현재<span class="sep">|</span><span class="en">DIKW Pyramid</span></h2>
+        </div>
+        <p class="stagger" style="color:var(--ink-secondary);font-size:0.92rem;margin-bottom:20px">Data에서 Wisdom까지 &mdash; <strong class="text-amber">모든 단계에 벽이 있다</strong></p>
+        <div class="stagger" style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+          <!-- DIKW Pyramid -->
+          <div class="card" style="padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;width:100%">
+              <div style="width:35%;padding:14px;text-align:center;border-radius:var(--radius-sm);background:var(--bg-card);border:1px dashed rgba(251,113,133,0.3)">
+                <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:0.92rem;color:var(--rose)">Wisdom</div>
+                <div style="font-size:0.68rem;color:var(--muted)">의사결정 &middot; 전략</div>
+              </div>
+              <div style="font-size:0.7rem;color:var(--muted)">&#9650;</div>
+              <div style="width:50%;padding:12px;text-align:center;border-radius:var(--radius-sm);background:var(--amber-dim);border:1px solid rgba(251,191,36,0.2)">
+                <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:0.88rem;color:var(--amber)">Knowledge</div>
+                <div style="font-size:0.68rem;color:var(--muted)">패턴 인식 &middot; 리포트</div>
+              </div>
+              <div style="font-size:0.7rem;color:var(--muted)">&#9650;</div>
+              <div style="width:65%;padding:12px;text-align:center;border-radius:var(--radius-sm);background:var(--blue-dim);border:1px solid rgba(96,165,250,0.2)">
+                <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:0.88rem;color:var(--blue)">Information</div>
+                <div style="font-size:0.68rem;color:var(--muted)">정리된 데이터 &middot; 집계</div>
+              </div>
+              <div style="font-size:0.7rem;color:var(--muted)">&#9650;</div>
+              <div style="width:80%;padding:12px;text-align:center;border-radius:var(--radius-sm);background:var(--bg-card);border:1px solid var(--line)">
+                <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:0.88rem;color:var(--ink-secondary)">Data</div>
+                <div style="font-size:0.68rem;color:var(--muted)">원시 로그 &middot; 이벤트</div>
+              </div>
+            </div>
+          </div>
+          <!-- 허들: 각 단계 전환의 벽 (위→아래 = Wisdom→Data, 피라미드와 매칭) -->
+          <div style="display:flex;flex-direction:column;justify-content:space-between;gap:10px">
+            <div class="card" style="border-left:3px dashed rgba(45,212,191,0.3);padding:14px 16px">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;letter-spacing:1px;color:var(--muted);margin-bottom:6px">KNOWLEDGE &rarr; WISDOM</div>
+              <h3 style="font-size:0.82rem;color:var(--rose)">&#128683; 의사결정의 벽</h3>
+              <p style="font-size:0.78rem">패턴은 보이지만 "그래서 뭘 해야 하는지" 불명확 &rarr; 인사이트 부재, 의사결정 지연</p>
+            </div>
+            <div class="card" style="border-left:3px solid var(--amber);padding:14px 16px">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;letter-spacing:1px;color:var(--muted);margin-bottom:6px">INFORMATION &rarr; KNOWLEDGE</div>
+              <h3 style="font-size:0.82rem;color:var(--amber)">&#128683; 해석의 벽</h3>
+              <p style="font-size:0.78rem">숫자는 있지만 비교·맥락 부여는 수작업 &rarr; 반복 리포팅, 데이터팀 의존</p>
+            </div>
+            <div class="card" style="border-left:3px solid var(--blue);padding:14px 16px">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;letter-spacing:1px;color:var(--muted);margin-bottom:6px">DATA &rarr; INFORMATION</div>
+              <h3 style="font-size:0.82rem;color:var(--blue)">&#128683; 수집의 벽</h3>
+              <p style="font-size:0.78rem">매체별 대시보드 로그인, CSV 다운로드, 수동 취합 &rarr; 시간 낭비</p>
+            </div>
+          </div>
+        </div>
+        <div class="conclusion-bar warning stagger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Data &rarr; Wisdom, 이 먼 거리를 수작업으로 매일 반복하고 있다
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 마케터의 하루: DIKW 워크플로우 ── -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="slide-header stagger">
+          <h2>마케터의 하루<span class="sep">|</span><span class="en">DIKW in Practice</span></h2>
+        </div>
+        <p class="stagger" style="color:var(--ink-secondary);font-size:0.92rem;margin-bottom:20px">매일 반복되는 이 과정, 얼마나 걸리는지 생각해 보셨나요?</p>
+        <div class="stagger" style="display:flex;align-items:stretch;gap:0">
+          <div class="flow-step" style="background:var(--bg-card);flex:1;border-top:3px solid var(--muted);padding-top:12px">
+            <!-- 흩어진 채널 대시보드 일러스트 -->
+            <div style="width:100%;margin-bottom:12px">
+              <svg viewBox="0 0 200 120" style="width:100%;height:auto;display:block">
+                <!-- Meta 대시보드 -->
+                <rect x="4" y="2" width="58" height="50" rx="4" fill="rgba(96,165,250,0.06)" stroke="rgba(96,165,250,0.25)" stroke-width="1"/>
+                <rect x="4" y="2" width="58" height="11" rx="4" fill="rgba(96,165,250,0.12)"/>
+                <rect x="8" y="15" width="58" height="0" rx="0" fill="none"/>
+                <circle cx="10" cy="7.5" r="2" fill="rgba(96,165,250,0.5)"/>
+                <text x="16" y="9.5" font-size="5" font-weight="700" fill="rgba(96,165,250,0.9)" font-family="sans-serif">Meta Ads</text>
+                <text x="10" y="21" font-size="4" fill="rgba(96,165,250,0.5)" font-family="sans-serif">Impressions</text>
+                <text x="10" y="28" font-size="7" font-weight="700" fill="rgba(96,165,250,0.8)" font-family="monospace">24,891</text>
+                <polyline points="10,42 18,38 26,40 34,35 42,37 50,32 56,34" fill="none" stroke="rgba(96,165,250,0.5)" stroke-width="1.2" stroke-linecap="round"/>
+                <line x1="10" y1="47" x2="56" y2="47" stroke="rgba(96,165,250,0.15)" stroke-width="0.5"/>
+
+                <!-- Google 대시보드 -->
+                <rect x="70" y="10" width="58" height="50" rx="4" fill="rgba(251,191,36,0.06)" stroke="rgba(251,191,36,0.25)" stroke-width="1"/>
+                <rect x="70" y="10" width="58" height="11" rx="4" fill="rgba(251,191,36,0.12)"/>
+                <circle cx="76" cy="15.5" r="2" fill="rgba(251,191,36,0.5)"/>
+                <text x="82" y="17.5" font-size="5" font-weight="700" fill="rgba(251,191,36,0.9)" font-family="sans-serif">Google Ads</text>
+                <text x="76" y="29" font-size="4" fill="rgba(251,191,36,0.5)" font-family="sans-serif">Clicks</text>
+                <text x="76" y="36" font-size="7" font-weight="700" fill="rgba(251,191,36,0.8)" font-family="monospace">8,412</text>
+                <!-- 바 차트 -->
+                <rect x="76" y="44" width="6" height="10" rx="1" fill="rgba(251,191,36,0.3)"/>
+                <rect x="84" y="41" width="6" height="13" rx="1" fill="rgba(251,191,36,0.4)"/>
+                <rect x="92" y="43" width="6" height="11" rx="1" fill="rgba(251,191,36,0.3)"/>
+                <rect x="100" y="39" width="6" height="15" rx="1" fill="rgba(251,191,36,0.5)"/>
+                <rect x="108" y="42" width="6" height="12" rx="1" fill="rgba(251,191,36,0.35)"/>
+
+                <!-- Kakao 대시보드 -->
+                <rect x="136" y="4" width="58" height="50" rx="4" fill="rgba(251,113,133,0.06)" stroke="rgba(251,113,133,0.25)" stroke-width="1"/>
+                <rect x="136" y="4" width="58" height="11" rx="4" fill="rgba(251,113,133,0.12)"/>
+                <circle cx="142" cy="9.5" r="2" fill="rgba(251,113,133,0.5)"/>
+                <text x="148" y="11.5" font-size="5" font-weight="700" fill="rgba(251,113,133,0.9)" font-family="sans-serif">Kakao Biz</text>
+                <text x="142" y="23" font-size="4" fill="rgba(251,113,133,0.5)" font-family="sans-serif">Cost</text>
+                <text x="142" y="30" font-size="7" font-weight="700" fill="rgba(251,113,133,0.8)" font-family="monospace">₩5.2M</text>
+                <!-- 파이 차트 -->
+                <circle cx="162" cy="44" r="8" fill="none" stroke="rgba(251,113,133,0.15)" stroke-width="4"/>
+                <circle cx="162" cy="44" r="8" fill="none" stroke="rgba(251,113,133,0.5)" stroke-width="4" stroke-dasharray="18 32" stroke-linecap="round" transform="rotate(-90 162 44)"/>
+
+                <!-- 흩어진 느낌의 연결선 (점선) -->
+                <line x1="62" y1="30" x2="70" y2="35" stroke="rgba(255,255,255,0.06)" stroke-width="0.8" stroke-dasharray="2,2"/>
+                <line x1="128" y1="35" x2="136" y2="28" stroke="rgba(255,255,255,0.06)" stroke-width="0.8" stroke-dasharray="2,2"/>
+
+                <!-- 하단 CSV/export 아이콘들 -->
+                <rect x="20" y="68" width="28" height="14" rx="3" fill="rgba(96,165,250,0.08)" stroke="rgba(96,165,250,0.2)" stroke-width="0.8"/>
+                <text x="34" y="77.5" text-anchor="middle" font-size="5" fill="rgba(96,165,250,0.6)" font-family="monospace">.csv</text>
+                <rect x="86" y="72" width="28" height="14" rx="3" fill="rgba(251,191,36,0.08)" stroke="rgba(251,191,36,0.2)" stroke-width="0.8"/>
+                <text x="100" y="81.5" text-anchor="middle" font-size="5" fill="rgba(251,191,36,0.6)" font-family="monospace">.xlsx</text>
+                <rect x="150" y="66" width="28" height="14" rx="3" fill="rgba(251,113,133,0.08)" stroke="rgba(251,113,133,0.2)" stroke-width="0.8"/>
+                <text x="164" y="75.5" text-anchor="middle" font-size="5" fill="rgba(251,113,133,0.6)" font-family="monospace">.csv</text>
+
+                <!-- 다운로드 화살표 -->
+                <line x1="34" y1="60" x2="34" y2="67" stroke="rgba(96,165,250,0.3)" stroke-width="0.8"/>
+                <polyline points="31,64 34,67 37,64" fill="none" stroke="rgba(96,165,250,0.3)" stroke-width="0.8"/>
+                <line x1="100" y1="62" x2="100" y2="71" stroke="rgba(251,191,36,0.3)" stroke-width="0.8"/>
+                <polyline points="97,68 100,71 103,68" fill="none" stroke="rgba(251,191,36,0.3)" stroke-width="0.8"/>
+                <line x1="164" y1="56" x2="164" y2="65" stroke="rgba(251,113,133,0.3)" stroke-width="0.8"/>
+                <polyline points="161,62 164,65 167,62" fill="none" stroke="rgba(251,113,133,0.3)" stroke-width="0.8"/>
+
+                <!-- 하단 텍스트 -->
+                <text x="100" y="100" text-anchor="middle" font-size="5.5" fill="rgba(255,255,255,0.2)" font-family="sans-serif">3개 매체 × 개별 로그인 × 수동 다운로드</text>
+              </svg>
+            </div>
+            <div style="font-size:0.68rem;color:var(--muted);margin-bottom:4px">STEP 01</div>
+            <strong style="color:var(--ink-secondary)">Data</strong>
+            <p>여러 매체에<br/>흩어진 원시 데이터</p>
+          </div>
+          <div class="flow-arrow">&rsaquo;</div>
+          <div class="flow-step" style="background:var(--bg-card);flex:1;border-top:3px solid var(--blue);padding-top:12px">
+            <!-- 스프레드시트 일러스트 -->
+            <div style="width:100%;margin-bottom:12px">
+              <svg viewBox="0 0 200 120" style="width:100%;height:auto;display:block">
+                <!-- 스프레드시트 프레임 -->
+                <rect x="8" y="2" width="184" height="110" rx="5" fill="rgba(96,165,250,0.04)" stroke="rgba(96,165,250,0.2)" stroke-width="1"/>
+                <!-- 타이틀 바 -->
+                <rect x="8" y="2" width="184" height="14" rx="5" fill="rgba(96,165,250,0.1)"/>
+                <rect x="8" y="11" width="184" height="5" fill="rgba(96,165,250,0.1)"/>
+                <circle cx="16" cy="9" r="2" fill="rgba(251,113,133,0.5)"/>
+                <circle cx="23" cy="9" r="2" fill="rgba(251,191,36,0.5)"/>
+                <circle cx="30" cy="9" r="2" fill="rgba(96,165,250,0.5)"/>
+                <text x="100" y="11" text-anchor="middle" font-size="5" font-weight="600" fill="rgba(96,165,250,0.6)" font-family="sans-serif">통합_리포트_0310.xlsx</text>
+
+                <!-- 수식 바 -->
+                <rect x="8" y="16" width="184" height="10" fill="rgba(96,165,250,0.03)"/>
+                <text x="14" y="23" font-size="4" fill="rgba(96,165,250,0.4)" font-family="monospace">fx</text>
+                <line x1="24" y1="17" x2="24" y2="25" stroke="rgba(96,165,250,0.15)" stroke-width="0.5"/>
+                <text x="28" y="23" font-size="4" fill="rgba(96,165,250,0.3)" font-family="monospace">=SUMIFS(Cost,Channel,"Meta")</text>
+
+                <!-- 헤더 행 -->
+                <rect x="8" y="26" width="30" height="12" fill="rgba(96,165,250,0.08)"/>
+                <rect x="38" y="26" width="35" height="12" fill="rgba(96,165,250,0.08)"/>
+                <rect x="73" y="26" width="30" height="12" fill="rgba(96,165,250,0.08)"/>
+                <rect x="103" y="26" width="30" height="12" fill="rgba(96,165,250,0.08)"/>
+                <rect x="133" y="26" width="30" height="12" fill="rgba(96,165,250,0.08)"/>
+                <rect x="163" y="26" width="29" height="12" fill="rgba(96,165,250,0.12)"/>
+                <text x="23" y="34" text-anchor="middle" font-size="4.5" font-weight="700" fill="rgba(96,165,250,0.7)" font-family="sans-serif">Channel</text>
+                <text x="55" y="34" text-anchor="middle" font-size="4.5" font-weight="700" fill="rgba(96,165,250,0.7)" font-family="sans-serif">Impressions</text>
+                <text x="88" y="34" text-anchor="middle" font-size="4.5" font-weight="700" fill="rgba(96,165,250,0.7)" font-family="sans-serif">Clicks</text>
+                <text x="118" y="34" text-anchor="middle" font-size="4.5" font-weight="700" fill="rgba(96,165,250,0.7)" font-family="sans-serif">Cost</text>
+                <text x="148" y="34" text-anchor="middle" font-size="4.5" font-weight="700" fill="rgba(96,165,250,0.7)" font-family="sans-serif">Installs</text>
+                <text x="177" y="34" text-anchor="middle" font-size="4.5" font-weight="700" fill="rgba(96,165,250,0.9)" font-family="sans-serif">CPA</text>
+
+                <!-- 그리드 라인 -->
+                <line x1="38" y1="26" x2="38" y2="98" stroke="rgba(96,165,250,0.08)" stroke-width="0.5"/>
+                <line x1="73" y1="26" x2="73" y2="98" stroke="rgba(96,165,250,0.08)" stroke-width="0.5"/>
+                <line x1="103" y1="26" x2="103" y2="98" stroke="rgba(96,165,250,0.08)" stroke-width="0.5"/>
+                <line x1="133" y1="26" x2="133" y2="98" stroke="rgba(96,165,250,0.08)" stroke-width="0.5"/>
+                <line x1="163" y1="26" x2="163" y2="98" stroke="rgba(96,165,250,0.1)" stroke-width="0.5"/>
+
+                <!-- Row 1: Meta -->
+                <rect x="8" y="38" width="184" height="12" fill="rgba(96,165,250,0.02)"/>
+                <line x1="8" y1="38" x2="192" y2="38" stroke="rgba(96,165,250,0.06)" stroke-width="0.5"/>
+                <circle cx="15" cy="44" r="2.5" fill="rgba(96,165,250,0.15)"/>
+                <text x="20" y="46" font-size="4.5" fill="rgba(96,165,250,0.7)" font-family="sans-serif">Meta</text>
+                <text x="55" y="46" text-anchor="middle" font-size="4.5" fill="rgba(255,255,255,0.5)" font-family="monospace">24,891</text>
+                <text x="88" y="46" text-anchor="middle" font-size="4.5" fill="rgba(255,255,255,0.5)" font-family="monospace">1,247</text>
+                <text x="118" y="46" text-anchor="middle" font-size="4.5" fill="rgba(255,255,255,0.5)" font-family="monospace">₩5.2M</text>
+                <text x="148" y="46" text-anchor="middle" font-size="4.5" fill="rgba(255,255,255,0.5)" font-family="monospace">892</text>
+                <text x="177" y="46" text-anchor="middle" font-size="4.5" font-weight="700" fill="rgba(96,165,250,0.9)" font-family="monospace">₩5,830</text>
+
+                <!-- Row 2: Google -->
+                <line x1="8" y1="50" x2="192" y2="50" stroke="rgba(96,165,250,0.06)" stroke-width="0.5"/>
+                <circle cx="15" cy="56" r="2.5" fill="rgba(251,191,36,0.15)"/>
+                <text x="20" y="58" font-size="4.5" fill="rgba(251,191,36,0.7)" font-family="sans-serif">Google</text>
+                <text x="55" y="58" text-anchor="middle" font-size="4.5" fill="rgba(255,255,255,0.5)" font-family="monospace">18,234</text>
+                <text x="88" y="58" text-anchor="middle" font-size="4.5" fill="rgba(255,255,255,0.5)" font-family="monospace">2,105</text>
+                <text x="118" y="58" text-anchor="middle" font-size="4.5" fill="rgba(255,255,255,0.5)" font-family="monospace">₩8.1M</text>
+                <text x="148" y="58" text-anchor="middle" font-size="4.5" fill="rgba(255,255,255,0.5)" font-family="monospace">1,540</text>
+                <text x="177" y="58" text-anchor="middle" font-size="4.5" font-weight="700" fill="rgba(96,165,250,0.9)" font-family="monospace">₩5,260</text>
+
+                <!-- Row 3: Kakao -->
+                <rect x="8" y="62" width="184" height="12" fill="rgba(96,165,250,0.02)"/>
+                <line x1="8" y1="62" x2="192" y2="62" stroke="rgba(96,165,250,0.06)" stroke-width="0.5"/>
+                <circle cx="15" cy="68" r="2.5" fill="rgba(251,113,133,0.15)"/>
+                <text x="20" y="70" font-size="4.5" fill="rgba(251,113,133,0.7)" font-family="sans-serif">Kakao</text>
+                <text x="55" y="70" text-anchor="middle" font-size="4.5" fill="rgba(255,255,255,0.5)" font-family="monospace">12,456</text>
+                <text x="88" y="70" text-anchor="middle" font-size="4.5" fill="rgba(255,255,255,0.5)" font-family="monospace">934</text>
+                <text x="118" y="70" text-anchor="middle" font-size="4.5" fill="rgba(255,255,255,0.5)" font-family="monospace">₩3.8M</text>
+                <text x="148" y="70" text-anchor="middle" font-size="4.5" fill="rgba(255,255,255,0.5)" font-family="monospace">612</text>
+                <text x="177" y="70" text-anchor="middle" font-size="4.5" font-weight="700" fill="rgba(96,165,250,0.9)" font-family="monospace">₩6,209</text>
+
+                <!-- Row 4: TikTok -->
+                <line x1="8" y1="74" x2="192" y2="74" stroke="rgba(96,165,250,0.06)" stroke-width="0.5"/>
+                <circle cx="15" cy="80" r="2.5" fill="rgba(167,139,250,0.15)"/>
+                <text x="20" y="82" font-size="4.5" fill="rgba(167,139,250,0.7)" font-family="sans-serif">TikTok</text>
+                <text x="55" y="82" text-anchor="middle" font-size="4.5" fill="rgba(255,255,255,0.5)" font-family="monospace">31,920</text>
+                <text x="88" y="82" text-anchor="middle" font-size="4.5" fill="rgba(255,255,255,0.5)" font-family="monospace">3,412</text>
+                <text x="118" y="82" text-anchor="middle" font-size="4.5" fill="rgba(255,255,255,0.5)" font-family="monospace">₩4.5M</text>
+                <text x="148" y="82" text-anchor="middle" font-size="4.5" fill="rgba(255,255,255,0.5)" font-family="monospace">1,125</text>
+                <text x="177" y="82" text-anchor="middle" font-size="4.5" font-weight="700" fill="rgba(96,165,250,0.9)" font-family="monospace">₩4,000</text>
+
+                <!-- 합계 행 -->
+                <rect x="8" y="86" width="184" height="12" fill="rgba(96,165,250,0.06)"/>
+                <line x1="8" y1="86" x2="192" y2="86" stroke="rgba(96,165,250,0.15)" stroke-width="0.8"/>
+                <text x="20" y="94" font-size="4.5" font-weight="700" fill="rgba(96,165,250,0.8)" font-family="sans-serif">Total</text>
+                <text x="55" y="94" text-anchor="middle" font-size="4.5" font-weight="600" fill="rgba(96,165,250,0.7)" font-family="monospace">87,501</text>
+                <text x="88" y="94" text-anchor="middle" font-size="4.5" font-weight="600" fill="rgba(96,165,250,0.7)" font-family="monospace">7,698</text>
+                <text x="118" y="94" text-anchor="middle" font-size="4.5" font-weight="600" fill="rgba(96,165,250,0.7)" font-family="monospace">₩21.6M</text>
+                <text x="148" y="94" text-anchor="middle" font-size="4.5" font-weight="600" fill="rgba(96,165,250,0.7)" font-family="monospace">4,169</text>
+                <text x="177" y="94" text-anchor="middle" font-size="4.5" font-weight="700" fill="rgba(96,165,250,1)" font-family="monospace">₩5,181</text>
+
+                <!-- 셀 선택 하이라이트 -->
+                <rect x="163" y="38" width="29" height="60" fill="none" stroke="rgba(96,165,250,0.4)" stroke-width="1.5" rx="1"/>
+
+                <!-- 하단 시트 탭 -->
+                <rect x="8" y="98" width="184" height="14" rx="0" fill="rgba(96,165,250,0.03)"/>
+                <line x1="8" y1="98" x2="192" y2="98" stroke="rgba(96,165,250,0.1)" stroke-width="0.5"/>
+                <rect x="12" y="101" width="32" height="8" rx="2" fill="rgba(96,165,250,0.12)" stroke="rgba(96,165,250,0.2)" stroke-width="0.5"/>
+                <text x="28" y="107" text-anchor="middle" font-size="3.8" fill="rgba(96,165,250,0.7)" font-family="sans-serif">0310 Daily</text>
+                <rect x="48" y="101" width="28" height="8" rx="2" fill="rgba(96,165,250,0.04)"/>
+                <text x="62" y="107" text-anchor="middle" font-size="3.8" fill="rgba(96,165,250,0.35)" font-family="sans-serif">Weekly</text>
+                <rect x="80" y="101" width="28" height="8" rx="2" fill="rgba(96,165,250,0.04)"/>
+                <text x="94" y="107" text-anchor="middle" font-size="3.8" fill="rgba(96,165,250,0.35)" font-family="sans-serif">Monthly</text>
+              </svg>
+            </div>
+            <div style="font-size:0.68rem;color:var(--blue);margin-bottom:4px">STEP 02</div>
+            <strong style="color:var(--blue)">Information</strong>
+            <p>스프레드시트에<br/>집계하고 정리</p>
+          </div>
+          <div class="flow-arrow">&rsaquo;</div>
+          <div class="flow-step" style="background:var(--bg-card);flex:1;border-top:3px solid var(--amber);padding-top:12px">
+            <!-- 트렌드 분석 차트 일러스트 -->
+            <div style="width:100%;margin-bottom:12px">
+              <svg viewBox="0 0 200 120" style="width:100%;height:auto;display:block">
+                <!-- 차트 배경 -->
+                <rect x="8" y="2" width="184" height="110" rx="5" fill="rgba(251,191,36,0.03)" stroke="rgba(251,191,36,0.15)" stroke-width="1"/>
+
+                <!-- 차트 타이틀 -->
+                <text x="16" y="14" font-size="5.5" font-weight="700" fill="rgba(251,191,36,0.8)" font-family="sans-serif">CPA Trend — Weekly Comparison</text>
+
+                <!-- 범례 -->
+                <line x1="140" y1="11" x2="150" y2="11" stroke="rgba(251,191,36,0.8)" stroke-width="1.5"/>
+                <text x="153" y="13" font-size="4" fill="rgba(251,191,36,0.6)" font-family="sans-serif">This Week</text>
+                <line x1="140" y1="18" x2="150" y2="18" stroke="rgba(251,191,36,0.35)" stroke-width="1.5" stroke-dasharray="3,2"/>
+                <text x="153" y="20" font-size="4" fill="rgba(251,191,36,0.4)" font-family="sans-serif">Last Week</text>
+
+                <!-- Y축 -->
+                <line x1="32" y1="26" x2="32" y2="92" stroke="rgba(251,191,36,0.12)" stroke-width="0.5"/>
+                <text x="28" y="30" text-anchor="end" font-size="3.8" fill="rgba(251,191,36,0.35)" font-family="monospace">₩8K</text>
+                <text x="28" y="46" text-anchor="end" font-size="3.8" fill="rgba(251,191,36,0.35)" font-family="monospace">₩6K</text>
+                <text x="28" y="62" text-anchor="end" font-size="3.8" fill="rgba(251,191,36,0.35)" font-family="monospace">₩4K</text>
+                <text x="28" y="78" text-anchor="end" font-size="3.8" fill="rgba(251,191,36,0.35)" font-family="monospace">₩2K</text>
+                <text x="28" y="93" text-anchor="end" font-size="3.8" fill="rgba(251,191,36,0.35)" font-family="monospace">₩0</text>
+
+                <!-- 그리드 라인 -->
+                <line x1="32" y1="28" x2="186" y2="28" stroke="rgba(251,191,36,0.06)" stroke-width="0.5"/>
+                <line x1="32" y1="44" x2="186" y2="44" stroke="rgba(251,191,36,0.06)" stroke-width="0.5"/>
+                <line x1="32" y1="60" x2="186" y2="60" stroke="rgba(251,191,36,0.06)" stroke-width="0.5"/>
+                <line x1="32" y1="76" x2="186" y2="76" stroke="rgba(251,191,36,0.06)" stroke-width="0.5"/>
+                <line x1="32" y1="92" x2="186" y2="92" stroke="rgba(251,191,36,0.1)" stroke-width="0.5"/>
+
+                <!-- X축 라벨 -->
+                <text x="46" y="100" text-anchor="middle" font-size="3.8" fill="rgba(251,191,36,0.35)" font-family="sans-serif">Mon</text>
+                <text x="72" y="100" text-anchor="middle" font-size="3.8" fill="rgba(251,191,36,0.35)" font-family="sans-serif">Tue</text>
+                <text x="98" y="100" text-anchor="middle" font-size="3.8" fill="rgba(251,191,36,0.35)" font-family="sans-serif">Wed</text>
+                <text x="124" y="100" text-anchor="middle" font-size="3.8" fill="rgba(251,191,36,0.35)" font-family="sans-serif">Thu</text>
+                <text x="150" y="100" text-anchor="middle" font-size="3.8" fill="rgba(251,191,36,0.35)" font-family="sans-serif">Fri</text>
+                <text x="176" y="100" text-anchor="middle" font-size="3.8" fill="rgba(251,191,36,0.35)" font-family="sans-serif">Sat</text>
+
+                <!-- 지난주 라인 (점선) -->
+                <polyline points="46,48 72,52 98,44 124,50 150,46 176,54" fill="none" stroke="rgba(251,191,36,0.3)" stroke-width="1.5" stroke-dasharray="4,3" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="46" cy="48" r="2" fill="rgba(251,191,36,0.2)" stroke="rgba(251,191,36,0.3)" stroke-width="0.5"/>
+                <circle cx="72" cy="52" r="2" fill="rgba(251,191,36,0.2)" stroke="rgba(251,191,36,0.3)" stroke-width="0.5"/>
+                <circle cx="98" cy="44" r="2" fill="rgba(251,191,36,0.2)" stroke="rgba(251,191,36,0.3)" stroke-width="0.5"/>
+                <circle cx="124" cy="50" r="2" fill="rgba(251,191,36,0.2)" stroke="rgba(251,191,36,0.3)" stroke-width="0.5"/>
+                <circle cx="150" cy="46" r="2" fill="rgba(251,191,36,0.2)" stroke="rgba(251,191,36,0.3)" stroke-width="0.5"/>
+                <circle cx="176" cy="54" r="2" fill="rgba(251,191,36,0.2)" stroke="rgba(251,191,36,0.3)" stroke-width="0.5"/>
+
+                <!-- 이번주 라인 (실선) — 개선 트렌드 -->
+                <polyline points="46,52 72,44 98,38 124,42 150,32" fill="none" stroke="rgba(251,191,36,0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="46" cy="52" r="2.5" fill="rgba(251,191,36,0.3)" stroke="rgba(251,191,36,0.8)" stroke-width="1"/>
+                <circle cx="72" cy="44" r="2.5" fill="rgba(251,191,36,0.3)" stroke="rgba(251,191,36,0.8)" stroke-width="1"/>
+                <circle cx="98" cy="38" r="2.5" fill="rgba(251,191,36,0.3)" stroke="rgba(251,191,36,0.8)" stroke-width="1"/>
+                <circle cx="124" cy="42" r="2.5" fill="rgba(251,191,36,0.3)" stroke="rgba(251,191,36,0.8)" stroke-width="1"/>
+                <circle cx="150" cy="32" r="3" fill="rgba(251,191,36,0.5)" stroke="rgba(251,191,36,0.9)" stroke-width="1.2"/>
+
+                <!-- 포인트 주석: CPA 개선 -->
+                <rect x="130" y="22" width="34" height="10" rx="3" fill="rgba(251,191,36,0.15)" stroke="rgba(251,191,36,0.3)" stroke-width="0.5"/>
+                <text x="147" y="29" text-anchor="middle" font-size="4" font-weight="700" fill="rgba(251,191,36,0.9)" font-family="sans-serif">-30% &#9660;</text>
+                <line x1="147" y1="32" x2="150" y2="32" stroke="rgba(251,191,36,0.4)" stroke-width="0.5"/>
+
+                <!-- 채널별 바 차트 (하단 작게) -->
+                <rect x="40" y="104" width="16" height="6" rx="1.5" fill="rgba(96,165,250,0.25)"/>
+                <rect x="60" y="104" width="22" height="6" rx="1.5" fill="rgba(251,191,36,0.25)"/>
+                <rect x="86" y="104" width="12" height="6" rx="1.5" fill="rgba(251,113,133,0.25)"/>
+                <rect x="102" y="104" width="18" height="6" rx="1.5" fill="rgba(167,139,250,0.25)"/>
+                <text x="48" y="109" text-anchor="middle" font-size="3" fill="rgba(96,165,250,0.5)" font-family="sans-serif">M</text>
+                <text x="71" y="109" text-anchor="middle" font-size="3" fill="rgba(251,191,36,0.5)" font-family="sans-serif">G</text>
+                <text x="92" y="109" text-anchor="middle" font-size="3" fill="rgba(251,113,133,0.5)" font-family="sans-serif">K</text>
+                <text x="111" y="109" text-anchor="middle" font-size="3" fill="rgba(167,139,250,0.5)" font-family="sans-serif">T</text>
+              </svg>
+            </div>
+            <div style="font-size:0.68rem;color:var(--amber);margin-bottom:4px">STEP 03</div>
+            <strong style="color:var(--amber)">Knowledge</strong>
+            <p>비교를 통해<br/>패턴과 트렌드 발견</p>
+          </div>
+          <div class="flow-arrow">&rsaquo;</div>
+          <div class="flow-step" style="flex:1;border-top:3px dashed rgba(45,212,191,0.3);background:var(--bg-card);padding-top:12px">
+            <!-- 의사결정 대시보드 일러스트 -->
+            <div style="width:100%;margin-bottom:12px">
+              <svg viewBox="0 0 200 120" style="width:100%;height:auto;display:block">
+                <!-- 배경 -->
+                <rect x="8" y="2" width="184" height="110" rx="5" fill="rgba(45,212,191,0.03)" stroke="rgba(45,212,191,0.15)" stroke-width="1"/>
+                <text x="16" y="14" font-size="5.5" font-weight="700" fill="rgba(45,212,191,0.8)" font-family="sans-serif">Action Items — Budget Reallocation</text>
+
+                <!-- 액션 카드 1: 예산 증액 -->
+                <rect x="14" y="22" width="84" height="36" rx="4" fill="rgba(45,212,191,0.06)" stroke="rgba(45,212,191,0.2)" stroke-width="0.8"/>
+                <circle cx="22" cy="30" r="4" fill="rgba(45,212,191,0.15)"/>
+                <text x="22" y="31.5" text-anchor="middle" font-size="4" fill="rgba(45,212,191,0.8)">&#9650;</text>
+                <text x="30" y="31" font-size="4.5" font-weight="700" fill="rgba(45,212,191,0.9)" font-family="sans-serif">Google &#183; 예산 +20%</text>
+                <text x="22" y="40" font-size="3.8" fill="rgba(45,212,191,0.5)" font-family="sans-serif">CPA ₩4,000 (최저) → 전환 효율 최고</text>
+                <!-- 프로그레스 바 -->
+                <rect x="22" y="47" width="68" height="4" rx="2" fill="rgba(45,212,191,0.1)"/>
+                <rect x="22" y="47" width="54" height="4" rx="2" fill="rgba(45,212,191,0.4)"/>
+                <text x="92" y="50.5" text-anchor="end" font-size="3.5" fill="rgba(45,212,191,0.6)" font-family="monospace">80%</text>
+
+                <!-- 액션 카드 2: 예산 감액 -->
+                <rect x="104" y="22" width="82" height="36" rx="4" fill="rgba(251,113,133,0.06)" stroke="rgba(251,113,133,0.2)" stroke-width="0.8"/>
+                <circle cx="112" cy="30" r="4" fill="rgba(251,113,133,0.15)"/>
+                <text x="112" y="31.5" text-anchor="middle" font-size="4" fill="rgba(251,113,133,0.8)">&#9660;</text>
+                <text x="120" y="31" font-size="4.5" font-weight="700" fill="rgba(251,113,133,0.9)" font-family="sans-serif">Kakao &#183; 예산 -15%</text>
+                <text x="112" y="40" font-size="3.8" fill="rgba(251,113,133,0.5)" font-family="sans-serif">CPA ₩6,209 (최고) → 소재 교체 필요</text>
+                <rect x="112" y="47" width="66" height="4" rx="2" fill="rgba(251,113,133,0.1)"/>
+                <rect x="112" y="47" width="20" height="4" rx="2" fill="rgba(251,113,133,0.4)"/>
+                <text x="180" y="50.5" text-anchor="end" font-size="3.5" fill="rgba(251,113,133,0.6)" font-family="monospace">30%</text>
+
+                <!-- 액션 카드 3: 소재 교체 -->
+                <rect x="14" y="62" width="84" height="36" rx="4" fill="rgba(251,191,36,0.06)" stroke="rgba(251,191,36,0.2)" stroke-width="0.8"/>
+                <circle cx="22" cy="70" r="4" fill="rgba(251,191,36,0.15)"/>
+                <text x="22" y="72" text-anchor="middle" font-size="5" fill="rgba(251,191,36,0.8)">&#8635;</text>
+                <text x="30" y="71" font-size="4.5" font-weight="700" fill="rgba(251,191,36,0.9)" font-family="sans-serif">Meta &#183; 소재 A/B 테스트</text>
+                <text x="22" y="80" font-size="3.8" fill="rgba(251,191,36,0.5)" font-family="sans-serif">CTR 하락 추세 → 신규 소재 3종 투입</text>
+                <rect x="22" y="87" width="68" height="4" rx="2" fill="rgba(251,191,36,0.1)"/>
+                <rect x="22" y="87" width="38" height="4" rx="2" fill="rgba(251,191,36,0.4)"/>
+                <text x="92" y="90.5" text-anchor="end" font-size="3.5" fill="rgba(251,191,36,0.6)" font-family="monospace">55%</text>
+
+                <!-- 액션 카드 4: 유지 -->
+                <rect x="104" y="62" width="82" height="36" rx="4" fill="rgba(167,139,250,0.06)" stroke="rgba(167,139,250,0.2)" stroke-width="0.8"/>
+                <circle cx="112" cy="70" r="4" fill="rgba(167,139,250,0.15)"/>
+                <text x="112" y="72" text-anchor="middle" font-size="5" fill="rgba(167,139,250,0.8)">&#10003;</text>
+                <text x="120" y="71" font-size="4.5" font-weight="700" fill="rgba(167,139,250,0.9)" font-family="sans-serif">TikTok &#183; 현행 유지</text>
+                <text x="112" y="80" font-size="3.8" fill="rgba(167,139,250,0.5)" font-family="sans-serif">CPA 안정 + 볼륨 확대 중 → 모니터링</text>
+                <rect x="112" y="87" width="66" height="4" rx="2" fill="rgba(167,139,250,0.1)"/>
+                <rect x="112" y="87" width="66" height="4" rx="2" fill="rgba(167,139,250,0.3)"/>
+                <text x="180" y="90.5" text-anchor="end" font-size="3.5" fill="rgba(167,139,250,0.6)" font-family="monospace">100%</text>
+
+                <!-- 하단 결과 요약 -->
+                <line x1="14" y1="102" x2="186" y2="102" stroke="rgba(45,212,191,0.15)" stroke-width="0.5"/>
+                <text x="100" y="110" text-anchor="middle" font-size="4.5" font-weight="600" fill="rgba(45,212,191,0.6)" font-family="sans-serif">예상 결과: 전체 CPA ₩5,181 → ₩4,200 (-19% 개선)</text>
+              </svg>
+            </div>
+            <div style="font-size:0.68rem;color:var(--cyan);margin-bottom:4px">STEP 04</div>
+            <strong style="color:var(--cyan)">Wisdom</strong>
+            <p>데이터 기반<br/>의사결정과 전략</p>
+          </div>
+        </div>
+        <!-- 수동 프로세스 상세 (SSOT WF-02 기반: 20+15+30+30+10 = 105분) -->
+        <div class="stagger" style="margin-top:16px;display:flex;align-items:center;gap:0;font-size:0.68rem">
+          <div style="flex:1;text-align:center;padding:6px 4px;background:rgba(100,116,139,0.08);border:1px solid rgba(100,116,139,0.15);border-radius:6px 0 0 6px">
+            <div style="font-family:'Outfit',sans-serif;font-size:0.85rem;font-weight:800;color:var(--muted)">~20분</div>
+            <div style="color:var(--muted);margin-top:2px;line-height:1.3">매체별 로그인<br/>&amp; CSV 다운로드</div>
+          </div>
+          <div style="color:var(--muted);font-size:0.6rem;padding:0 2px">&rsaquo;</div>
+          <div style="flex:1;text-align:center;padding:6px 4px;background:rgba(96,165,250,0.06);border:1px solid rgba(96,165,250,0.12)">
+            <div style="font-family:'Outfit',sans-serif;font-size:0.85rem;font-weight:800;color:var(--blue)">~15분</div>
+            <div style="color:var(--blue);margin-top:2px;line-height:1.3;opacity:0.7">포맷 통일<br/>&amp; 스프레드시트 병합</div>
+          </div>
+          <div style="color:var(--muted);font-size:0.6rem;padding:0 2px">&rsaquo;</div>
+          <div style="flex:1;text-align:center;padding:6px 4px;background:rgba(96,165,250,0.08);border:1px solid rgba(96,165,250,0.15)">
+            <div style="font-family:'Outfit',sans-serif;font-size:0.85rem;font-weight:800;color:var(--blue)">~30분</div>
+            <div style="color:var(--blue);margin-top:2px;line-height:1.3;opacity:0.7">KPI 집계<br/>CPA·ROAS·CTR</div>
+          </div>
+          <div style="color:var(--muted);font-size:0.6rem;padding:0 2px">&rsaquo;</div>
+          <div style="flex:1;text-align:center;padding:6px 4px;background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.12)">
+            <div style="font-family:'Outfit',sans-serif;font-size:0.85rem;font-weight:800;color:var(--amber)">~30분</div>
+            <div style="color:var(--amber);margin-top:2px;line-height:1.3;opacity:0.7">전주 대비 분석<br/>&amp; 리포트 작성</div>
+          </div>
+          <div style="color:var(--muted);font-size:0.6rem;padding:0 2px">&rsaquo;</div>
+          <div style="flex:1;text-align:center;padding:6px 4px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.15)">
+            <div style="font-family:'Outfit',sans-serif;font-size:0.85rem;font-weight:800;color:var(--amber)">~10분</div>
+            <div style="color:var(--amber);margin-top:2px;line-height:1.3;opacity:0.7">슬랙·노션·이메일<br/>공유</div>
+          </div>
+          <div style="color:var(--muted);font-size:0.6rem;padding:0 4px">+</div>
+          <div style="flex:1;text-align:center;padding:6px 4px;background:rgba(251,113,133,0.06);border:1px solid rgba(251,113,133,0.15);border-radius:0 6px 6px 0">
+            <div style="font-family:'Outfit',sans-serif;font-size:0.85rem;font-weight:800;color:var(--rose)">+15분</div>
+            <div style="color:var(--rose);margin-top:2px;line-height:1.3;opacity:0.7">후속 질의마다<br/>1~5 전부 반복</div>
+          </div>
+        </div>
+        <div class="conclusion-bar warning stagger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          매일 반복, 총 ~2시간 &mdash; 정작 Wisdom까지 갈 여력이 없다
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 진짜 원하는 것: 같은 데이터, 다른 결과 ── -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="slide-header stagger">
+          <h2>진짜 원하는 것<span class="sep">|</span><span class="en">What It Really Takes</span></h2>
+        </div>
+        <p class="stagger" style="color:var(--ink-secondary);font-size:0.92rem;margin-bottom:20px">모두가 이 수준의 분석을 원한다 &mdash; <strong class="text-cyan">문제는 비용이다</strong></p>
+
+        <!-- Wisdom 수준 OUTPUT -->
+        <div class="stagger" style="padding:18px 22px;border-radius:var(--radius-sm);background:var(--cyan-dim);border:1px solid var(--cyan-mid);margin-bottom:8px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <div class="ic ic-sm" style="background:rgba(0,0,0,0.2);color:var(--cyan)">W</div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;letter-spacing:1px;color:var(--cyan)">OUTPUT &mdash; Wisdom 수준의 분석</span>
+          </div>
+          <div style="padding:14px 16px;border-radius:var(--radius-xs);background:rgba(0,0,0,0.25);font-size:0.85rem;line-height:1.7;color:var(--ink-secondary);border-left:2px solid var(--cyan-mid)">
+            "카카오 CPA가 <strong style="color:var(--ink)">3일 연속 상승</strong> 중. <strong style="color:var(--ink)">타겟 피로도 누적</strong>이 원인으로 보임.<br/>예산 <strong style="color:var(--ink)">10% 축소 + 소재 2종 교체</strong> 추천. 예상 효과: CPA <strong style="color:var(--cyan)">&#8361;2,700</strong> 수준 회복"
+          </div>
+          <div style="margin-top:10px;padding:8px 14px;border-radius:var(--radius-xs);background:rgba(0,0,0,0.15);font-size:0.75rem;color:var(--cyan)">&#10003; 원인 분석 &rarr; 액션 추천 &rarr; 예상 결과까지 &mdash; 이것이 모든 마케터가 원하는 답</div>
+        </div>
+
+        <!-- "이걸 만들려면?" 라벨 -->
+        <div style="text-align:center;margin:16px 0 12px" class="stagger">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;letter-spacing:2px;color:var(--muted)">이걸 만들려면?</span>
+        </div>
+
+        <!-- 3명의 전문가 카드 -->
+        <div class="card-grid-3 stagger">
+          <div class="card" style="padding:18px;border-top:3px solid var(--blue)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+              <div class="ic ic-sm" style="background:var(--blue-dim);color:var(--blue)">1</div>
+              <h3 style="font-size:0.82rem;margin-bottom:0">퍼포먼스 마케터</h3>
+            </div>
+            <p style="font-size:0.75rem;margin-bottom:10px">매체별 대시보드 로그인, 데이터 수집, 트렌드 파악, 소재 성과 비교</p>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--blue);text-align:right">~2h</div>
+          </div>
+          <div class="card" style="padding:18px;border-top:3px solid var(--amber)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+              <div class="ic ic-sm" style="background:var(--amber-dim);color:var(--amber)">2</div>
+              <h3 style="font-size:0.82rem;margin-bottom:0">데이터 분석가</h3>
+            </div>
+            <p style="font-size:0.75rem;margin-bottom:10px">교차 분석, 이상 탐지, 원인 진단, 과거 패턴 대조</p>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--amber);text-align:right">~3h</div>
+          </div>
+          <div class="card" style="padding:18px;border-top:3px solid var(--cyan)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+              <div class="ic ic-sm" style="background:var(--cyan-dim);color:var(--cyan)">3</div>
+              <h3 style="font-size:0.82rem;margin-bottom:0">마케팅 매니저</h3>
+            </div>
+            <p style="font-size:0.75rem;margin-bottom:10px">전략 판단, 예산 재배분 결정, 액션 플랜 수립</p>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--cyan);text-align:right">~1h</div>
+          </div>
+        </div>
+
+        <!-- 경고 바: 큰 팀만 가능 -->
+        <div class="conclusion-bar warning stagger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          3명 이상의 전문가 &middot; 반나절 이상 소요 &mdash; <strong>큰 팀에서만 가능한 일</strong>
+        </div>
+
+        <!-- 결론: Agent 티저 -->
+        <div class="conclusion-bar stagger" style="background:rgba(255,255,255,0.03);border-color:var(--line-strong);color:var(--ink)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2" style="width:18px;height:18px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          이 전체를 <strong class="text-cyan">Agent 하나</strong>가 해낸다면? &mdash; 소규모 팀도 마케팅 최적화가 가능해진다
+        </div>
+      </div>
+    </section>
+
+    <!-- ── MCP의 역할: Bridging the Long Mile ── -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="slide-header stagger">
+          <h2>MCP의 역할<span class="sep">|</span><span class="en">Bridging the Long Mile</span></h2>
+        </div>
+        <p class="stagger" style="color:var(--ink-secondary);font-size:0.92rem;margin-bottom:24px"><strong class="text-cyan">Data &rarr; Wisdom</strong>은 너무 먼 거리다. MCP가 이 다리를 놓는다</p>
+
+        <!-- Gap 다이어그램 -->
+        <div class="stagger" style="display:flex;align-items:center;gap:0;margin-bottom:28px">
+          <!-- Data 블록 -->
+          <div style="flex:0 0 18%;padding:20px 16px;border-radius:var(--radius-sm);background:var(--amber-dim);border:1px solid rgba(251,191,36,0.2);text-align:center">
+            <div style="font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:800;color:var(--amber)">Data</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">현재 위치</div>
+          </div>
+          <!-- LONG GAP 영역 -->
+          <div style="flex:1;position:relative;padding:0 8px">
+            <div style="border-top:2px dashed rgba(251,113,133,0.35);margin:0 4px"></div>
+            <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);padding:2px 12px;border-radius:4px;background:var(--rose-dim);border:1px solid rgba(251,113,133,0.2);font-family:'JetBrains Mono',monospace;font-size:0.65rem;font-weight:600;color:var(--rose);letter-spacing:1px;white-space:nowrap">TOO FAR</div>
+          </div>
+          <!-- Wisdom 블록 -->
+          <div style="flex:0 0 18%;padding:20px 16px;border-radius:var(--radius-sm);background:var(--cyan-dim);border:1px solid var(--cyan-mid);text-align:center">
+            <div style="font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:800;color:var(--cyan)">Wisdom</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">목표</div>
+          </div>
+        </div>
+
+        <!-- MCP가 채우는 3가지 -->
+        <div style="text-align:center;margin-bottom:14px" class="stagger">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;letter-spacing:2px;color:var(--muted)">MCP가 이 갭을 채우는 방법</span>
+        </div>
+        <div class="card-grid-3 stagger">
+          <div class="card" style="padding:20px;border-top:3px solid var(--blue)">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+              <div class="ic ic-sm" style="background:var(--blue-dim);color:var(--blue)">T</div>
+              <h3 style="font-size:0.88rem;margin-bottom:0">MCP Tools</h3>
+            </div>
+            <p style="font-size:0.78rem;margin-bottom:8px">AI가 Airbridge API를 <strong style="color:var(--ink)">직접 호출</strong>한다. 사람이 대시보드에 로그인할 필요 없음</p>
+            <div style="display:flex;flex-wrap:wrap;gap:4px">
+              <span style="padding:2px 7px;border-radius:4px;background:var(--blue-dim);border:1px solid rgba(96,165,250,0.15);font-size:0.62rem;color:var(--blue)">Actuals</span>
+              <span style="padding:2px 7px;border-radius:4px;background:var(--blue-dim);border:1px solid rgba(96,165,250,0.15);font-size:0.62rem;color:var(--blue)">Revenue</span>
+              <span style="padding:2px 7px;border-radius:4px;background:var(--blue-dim);border:1px solid rgba(96,165,250,0.15);font-size:0.62rem;color:var(--blue)">Retention</span>
+              <span style="padding:2px 7px;border-radius:4px;background:var(--blue-dim);border:1px solid rgba(96,165,250,0.15);font-size:0.62rem;color:var(--blue)">Active Users</span>
+              <span style="padding:2px 7px;border-radius:4px;background:var(--blue-dim);border:1px solid rgba(96,165,250,0.15);font-size:0.62rem;color:var(--blue)">Raw Export</span>
+              <span style="padding:2px 7px;border-radius:4px;background:var(--blue-dim);border:1px solid rgba(96,165,250,0.15);font-size:0.62rem;color:var(--blue)">Tracking Links</span>
+            </div>
+          </div>
+          <div class="card" style="padding:20px;border-top:3px solid var(--amber)">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+              <div class="ic ic-sm" style="background:var(--amber-dim);color:var(--amber)">R</div>
+              <h3 style="font-size:0.88rem;margin-bottom:0">MCP Resources</h3>
+            </div>
+            <p style="font-size:0.78rem;margin-bottom:8px">AI가 <strong style="color:var(--ink)">업무 맥락을 이해</strong>한 상태에서 답변한다</p>
+            <div style="display:flex;flex-wrap:wrap;gap:4px">
+              <span style="padding:2px 7px;border-radius:4px;background:var(--amber-dim);border:1px solid rgba(251,191,36,0.15);font-size:0.62rem;color:var(--amber)">채널 특성</span>
+              <span style="padding:2px 7px;border-radius:4px;background:var(--amber-dim);border:1px solid rgba(251,191,36,0.15);font-size:0.62rem;color:var(--amber)">이벤트 택소노미</span>
+              <span style="padding:2px 7px;border-radius:4px;background:var(--amber-dim);border:1px solid rgba(251,191,36,0.15);font-size:0.62rem;color:var(--amber)">MCP UI 가이드</span>
+              <span style="padding:2px 7px;border-radius:4px;background:var(--amber-dim);border:1px solid rgba(251,191,36,0.15);font-size:0.62rem;color:var(--amber)">Docs &amp; KB</span>
+            </div>
+          </div>
+          <div class="card" style="padding:20px;border-top:3px solid var(--cyan)">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+              <div class="ic ic-sm" style="background:var(--cyan-dim);color:var(--cyan)">&#9670;</div>
+              <h3 style="font-size:0.88rem;margin-bottom:0">LLM Reasoning</h3>
+            </div>
+            <p style="font-size:0.78rem;margin-bottom:8px">데이터 + 맥락을 결합해 <strong style="color:var(--ink)">실행 가능한 액션 아이템</strong>을 도출</p>
+            <div style="display:flex;flex-wrap:wrap;gap:4px">
+              <span style="padding:2px 7px;border-radius:4px;background:var(--cyan-dim);border:1px solid var(--cyan-mid);font-size:0.62rem;color:var(--cyan)">이상 탐지</span>
+              <span style="padding:2px 7px;border-radius:4px;background:var(--cyan-dim);border:1px solid var(--cyan-mid);font-size:0.62rem;color:var(--cyan)">원인 분석</span>
+              <span style="padding:2px 7px;border-radius:4px;background:var(--cyan-dim);border:1px solid var(--cyan-mid);font-size:0.62rem;color:var(--cyan)">예산 재배분</span>
+              <span style="padding:2px 7px;border-radius:4px;background:var(--cyan-dim);border:1px solid var(--cyan-mid);font-size:0.62rem;color:var(--cyan)">소재 추천</span>
+              <span style="padding:2px 7px;border-radius:4px;background:var(--cyan-dim);border:1px solid var(--cyan-mid);font-size:0.62rem;color:var(--cyan)">자연어 리포트</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="conclusion-bar stagger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M9 12l2 2 4-4"/></svg>
+          MCP + Agent로 Data &rarr; Wisdom 전체 여정을 자동화한다 &mdash; 소규모 팀도 마케팅 최적화가 가능해지는 시대
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════╗ -->
+    <!-- ║   PART 03 — MCP for Performance Marketer ║ -->
+    <!-- ╚══════════════════════════════════════════╝ -->
+
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="part-divider">
+          <div class="part-left stagger">
+            <span class="part-section-badge">SECTION</span>
+            <div class="part-label">PART</div>
+            <div class="part-num">03</div>
+            <div class="part-bar"></div>
+          </div>
+          <div class="part-right stagger">
+            <h2>사용법 + 실전</h2>
+            <div class="part-sub">Setup &middot; Demo</div>
+            <div class="part-agenda">
+              <div class="part-agenda-item"><span class="part-agenda-num">01</span><div class="part-agenda-text"><strong>업무 변화</strong><span>데이터 취합자 &rarr; 성장 전략가</span></div></div>
+              <div class="part-agenda-item"><span class="part-agenda-num">02</span><div class="part-agenda-text"><strong>Airbridge MCP</strong><span>도구 &amp; OAuth 2.1</span></div></div>
+              <div class="part-agenda-item"><span class="part-agenda-num">03</span><div class="part-agenda-text"><strong>설치 가이드</strong><span>5분 내 설치</span></div></div>
+              <div class="part-agenda-item"><span class="part-agenda-num">04</span><div class="part-agenda-text"><strong>실전 시나리오</strong><span>실제 대화 예시로 보는 활용법</span></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="part-footer">PART 3 STRUCTURE</div>
+      </div>
+    </section>
+
+    <!-- ── 업무 변화 ── -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="slide-header stagger">
+          <h2>업무 변화<span class="sep">|</span><span class="en">From Manual to Agentic</span></h2>
+        </div>
+        <div class="compare-2col stagger" style="border:1px solid var(--line);border-radius:var(--radius);overflow:hidden">
+          <div class="compare-side left">
+            <div class="side-header">
+              <div class="ic ic-md" style="background:var(--rose-dim);color:var(--rose)">&#128100;</div>
+              <div><h3>현재 마케터</h3><span class="text-rose">데이터 취합자</span></div>
+            </div>
+            <div class="compare-item"><span class="label text-muted" style="color:var(--rose)">09:00</span><span class="text">5개 플랫폼에 수동 로그인</span></div>
+            <div class="compare-item"><span class="label text-muted" style="color:var(--rose)">10:00</span><span class="text">CSV 다운 &rarr; 엑셀 정리 &rarr; 복붙</span></div>
+            <div class="compare-item"><span class="label text-muted" style="color:var(--rose)">12:00</span><span class="text">데이터 검증, 이상치 확인</span></div>
+            <div class="compare-item"><span class="label text-muted" style="color:var(--rose)">14:00</span><span class="text">오후에야 분석 시작</span></div>
+            <div style="margin-top:12px;padding:10px 14px;border-radius:var(--radius-xs);background:var(--rose-dim);border:1px solid rgba(251,113,133,0.15);font-size:0.78rem;color:var(--rose)">&#9888; 업무 시간의 80%가 취합에 소모</div>
+          </div>
+          <div class="compare-side">
+            <div class="side-header">
+              <div class="ic ic-md" style="background:var(--cyan-dim);color:var(--cyan)">&#129302;</div>
+              <div><h3>MCP 도입 후</h3><span class="text-cyan">성장 전략가</span></div>
+            </div>
+            <div class="compare-item" style="border-color:var(--cyan-mid)"><span class="label" style="color:var(--cyan)">09:00</span><span class="text">"어제 캠페인 성과 요약해줘"</span></div>
+            <div class="compare-item" style="border-color:var(--cyan-mid)"><span class="label" style="color:var(--cyan)">09:01</span><span class="text">AI가 실시간 데이터 조회 &rarr; 인사이트 제공</span></div>
+            <div class="compare-item" style="border-color:var(--cyan-mid)"><span class="label" style="color:var(--cyan)">09:10</span><span class="text">이상 탐지 알림, 원인 분석 요청</span></div>
+            <div class="compare-item" style="border-color:var(--cyan-mid)"><span class="label" style="color:var(--cyan)">09:30</span><span class="text">예산 재배분 전략 수립 &amp; 실행</span></div>
+            <div style="margin-top:12px;padding:10px 14px;border-radius:var(--radius-xs);background:var(--cyan-dim);border:1px solid var(--cyan-mid);font-size:0.78rem;color:var(--cyan)">&#10003; 분석과 전략에 80% 시간 투자</div>
+          </div>
+        </div>
+        <div class="conclusion-bar stagger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M9 12l2 2 4-4"/></svg>
+          MCP는 마케터를 "데이터 취합자"에서 "성장 전략가"로 전환시키는 인프라
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Airbridge MCP ── -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="slide-header stagger">
+          <h2>Airbridge MCP<span class="sep">|</span><span class="en">OAuth 2.1</span></h2>
+        </div>
+        <div class="stagger" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+          <div class="card" style="border-top:3px solid var(--cyan);padding:18px">
+            <div class="step-badge">READ TOOLS</div>
+            <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:0.72rem">
+              <div style="padding:6px 8px;border-radius:4px;background:var(--bg-card);color:var(--ink-secondary)">Actuals Report</div>
+              <div style="padding:6px 8px;border-radius:4px;background:var(--bg-card);color:var(--ink-secondary)">Revenue Report</div>
+              <div style="padding:6px 8px;border-radius:4px;background:var(--bg-card);color:var(--ink-secondary)">Retention Report</div>
+              <div style="padding:6px 8px;border-radius:4px;background:var(--bg-card);color:var(--ink-secondary)">Active Users</div>
+              <div style="padding:6px 8px;border-radius:4px;background:var(--bg-card);color:var(--ink-secondary)">App / Org Info</div>
+              <div style="padding:6px 8px;border-radius:4px;background:var(--bg-card);color:var(--ink-secondary)">Tracking Links</div>
+              <div style="padding:6px 8px;border-radius:4px;background:var(--bg-card);color:var(--ink-secondary)">Knowledge Base</div>
+              <div style="padding:6px 8px;border-radius:4px;background:var(--bg-card);color:var(--ink-secondary)">Guide / Docs</div>
+            </div>
+          </div>
+          <div class="card" style="border-top:3px solid var(--amber);padding:18px">
+            <div class="step-badge" style="background:var(--amber-dim);border-color:rgba(251,191,36,0.15);color:var(--amber)">RESOURCES &mdash; 비즈니스 맥락</div>
+            <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px;font-size:0.72rem">
+              <div style="padding:6px 8px;border-radius:4px;background:var(--cyan-dim);border:1px solid var(--cyan-mid);color:var(--ink-secondary)">Help Center / Guide <span style="font-size:0.6rem;color:var(--cyan);margin-left:4px">Phase 1</span></div>
+              <div style="padding:6px 8px;border-radius:4px;background:var(--bg-card);color:var(--muted);border:1px dashed rgba(255,255,255,0.08)">채널별 특성 가이드 <span style="font-size:0.6rem;color:var(--amber);margin-left:4px">계획 중</span></div>
+              <div style="padding:6px 8px;border-radius:4px;background:var(--bg-card);color:var(--muted);border:1px dashed rgba(255,255,255,0.08)">이벤트 택소노미 가이드 <span style="font-size:0.6rem;color:var(--amber);margin-left:4px">계획 중</span></div>
+              <div style="padding:6px 8px;border-radius:4px;background:var(--bg-card);color:var(--muted);border:1px dashed rgba(255,255,255,0.08)">MCP UI 가이드 <span style="font-size:0.6rem;color:var(--amber);margin-left:4px">계획 중</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="stagger" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+          <div class="card" style="padding:14px;text-align:center;border-top:2px solid var(--cyan)">
+            <div style="font-size:0.68rem;color:var(--muted);margin-bottom:4px">보안</div>
+            <div style="font-size:0.82rem;font-weight:600">OAuth 2.1 + PKCE</div>
+            <div style="font-size:0.68rem;color:var(--muted);margin-top:4px">No Storage &middot; No Training</div>
+          </div>
+          <div class="card" style="padding:14px;text-align:center;border-top:2px solid var(--blue)">
+            <div style="font-size:0.68rem;color:var(--muted);margin-bottom:4px">접근 제어</div>
+            <div style="font-size:0.82rem;font-weight:600">RBAC + 도구별 Opt-out</div>
+            <div style="font-size:0.68rem;color:var(--muted);margin-top:4px">PII 접근 원천 차단</div>
+          </div>
+          <div class="card" style="padding:14px;text-align:center;border-top:2px solid var(--violet)">
+            <div style="font-size:0.68rem;color:var(--muted);margin-bottom:4px">지원 플랫폼</div>
+            <div style="font-size:0.82rem;font-weight:600">Claude &middot; ChatGPT &middot; Cursor</div>
+            <div style="font-size:0.68rem;color:var(--muted);margin-top:4px">Gemini CLI &middot; Windsurf</div>
+          </div>
+        </div>
+        <div class="conclusion-bar stagger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M9 12l2 2 4-4"/></svg>
+          하나의 Airbridge MCP 서버 = 전체 AI 생태계에서 안전하게 동작
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 설치 가이드 ── -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="slide-header stagger">
+          <h2>설치 가이드<span class="sep">|</span><span class="en">5-Minute Setup</span></h2>
+        </div>
+        <div class="card-grid-2 stagger">
+          <div class="card" style="border-top:3px solid var(--cyan)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+              <div class="step-badge">PATH 1</div>
+              <h3>JSON 설정 파일 방식</h3>
+            </div>
+            <p style="font-size:0.78rem;color:var(--muted);margin-bottom:4px">Cursor &middot; Windsurf &middot; Gemini CLI</p>
+            <p style="font-size:0.68rem;color:var(--muted);opacity:0.7;margin-bottom:12px">설정 파일에 MCP 서버 URL 추가 &rarr; OAuth 자동 시작</p>
+            <pre class="code-block"><code><span class="comment">// Cursor &mdash; .cursor/mcp.json</span>
+{ <span class="key">"mcpServers"</span>: { <span class="key">"airbridge"</span>: {
+    <span class="key">"url"</span>: <span class="string">"https://mcp.airbridge.io/mcp"</span>
+}}}
+
+<span class="comment">// Windsurf &mdash; ~/.codeium/windsurf/mcp_config.json</span>
+  <span class="key">"serverUrl"</span>: <span class="string">"https://mcp.airbridge.io/mcp"</span>
+
+<span class="comment">// Gemini CLI &mdash; ~/.gemini/settings.json</span>
+  <span class="key">"httpUrl"</span>: <span class="string">"https://mcp.airbridge.io/mcp"</span></code></pre>
+            <div style="margin-top:8px;padding:6px 10px;border-radius:var(--radius-xs);background:var(--cyan-dim);font-size:0.68rem;color:var(--cyan)">URL 추가 후 첫 요청 시 OAuth 인증이 자동으로 시작됩니다</div>
+          </div>
+          <div class="card" style="border-top:3px solid var(--blue)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+              <div class="step-badge" style="background:var(--blue-dim);border-color:rgba(96,165,250,0.2);color:var(--blue)">PATH 2</div>
+              <h3>UI 설정 방식</h3>
+            </div>
+            <p style="font-size:0.78rem;color:var(--muted);margin-bottom:4px">Claude &middot; ChatGPT</p>
+            <p style="font-size:0.68rem;color:var(--muted);opacity:0.7;margin-bottom:12px">설정 화면에서 URL 입력 &mdash; JSON 편집 불필요</p>
+            <pre class="code-block"><code><span class="comment">// Claude Desktop &amp; Web (Pro+)</span>
+Settings &rarr; Connectors &rarr; <span class="string">"Add custom connector"</span>
+  URL: <span class="string">https://mcp.airbridge.io/mcp</span>
+  Advanced: OAuth Client ID / Secret
+
+<span class="comment">// ChatGPT (Plus+ / Business / Enterprise)</span>
+Settings &rarr; Apps &rarr; Developer Mode &rarr; <span class="string">"Create app"</span>
+  URL: <span class="string">https://mcp.airbridge.io/mcp</span>
+  &#9888; OAuth 2.1 + PKCE 필수 (Bearer 직접 불가)</code></pre>
+            <div style="margin-top:8px;padding:6px 10px;border-radius:var(--radius-xs);background:var(--cyan-dim);font-size:0.68rem;color:var(--cyan)">Claude: Connectors 디렉토리에서 원클릭 설치도 가능</div>
+          </div>
+        </div>
+        <div class="flow-h stagger" style="margin-top:16px">
+          <div class="flow-step" style="border-top:3px solid var(--cyan)"><div class="step-badge">STEP 01</div><strong>MCP 서버 URL 추가</strong><p>JSON 또는 UI에서<br/><code style="font-size:0.65rem">mcp.airbridge.io/mcp</code> 입력</p></div>
+          <div class="flow-arrow">&rsaquo;</div>
+          <div class="flow-step" style="border-top:3px solid var(--blue)"><div class="step-badge" style="background:var(--blue-dim);border-color:rgba(96,165,250,0.2);color:var(--blue)">STEP 02</div><strong>OAuth 인증</strong><p>Airbridge 로그인 &rarr;<br/>Consent 화면에서 권한 승인</p></div>
+          <div class="flow-arrow">&rsaquo;</div>
+          <div class="flow-step" style="border-top:3px solid var(--violet)"><div class="step-badge" style="background:var(--violet-dim);border-color:rgba(167,139,250,0.2);color:var(--violet)">STEP 03</div><strong>자연어 질의 시작</strong><p>"어제 네이버 CPA 알려줘"<br/><span style="font-size:0.62rem;color:var(--muted)">토큰 갱신은 자동</span></p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 실전 시나리오 ── -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="slide-header stagger">
+          <h2>실전 시나리오<span class="sep">|</span><span class="en">Real-World Demo</span></h2>
+        </div>
+        <p class="stagger" style="color:var(--ink-secondary);font-size:0.92rem;margin-bottom:16px">MCP 연결 후 실제로 이렇게 대화합니다</p>
+        <div class="stagger" style="display:flex;flex-direction:column;gap:10px">
+          <!-- Scenario 1: 멀티턴 대화 -->
+          <div class="card" style="padding:16px;border-left:3px solid var(--cyan)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+              <div class="step-badge">SCENARIO 1</div>
+              <h3 style="font-size:0.85rem">아침 성과 확인 &rarr; 후속 드릴다운</h3>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:0.75rem">
+              <div style="padding:8px 10px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line)">
+                <span style="color:var(--muted);font-size:0.62rem">&#128100; 마케터</span>
+                <div style="color:var(--ink);margin-top:2px">"어제 전체 채널 성과 요약해줘"</div>
+              </div>
+              <div style="padding:8px 10px;border-radius:var(--radius-xs);background:var(--cyan-dim);border:1px solid var(--cyan-mid)">
+                <span style="color:var(--muted);font-size:0.62rem">&#129302; Claude &mdash; <code style="font-size:0.58rem;color:var(--cyan)">get_actuals_report</code> 호출</span>
+                <div style="color:var(--ink);margin-top:2px">"어제(3/8) 전체 성과입니다. 총 설치 4,169건, 총 비용 &#8361;21.6M, 평균 CPA &#8361;5,181입니다.<br/>채널별로 보면 Google이 CPA &#8361;4,000으로 가장 효율이 좋고, Kakao가 &#8361;6,209로 가장 높습니다. 상세 채널별 분석이 필요하시면 말씀해주세요."</div>
+              </div>
+              <div style="padding:8px 10px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line)">
+                <span style="color:var(--muted);font-size:0.62rem">&#128100; 마케터</span>
+                <div style="color:var(--ink);margin-top:2px">"카카오 CPA가 왜 이렇게 높아? 지난주랑 비교해서 뭐가 달라졌는지 봐줘"</div>
+              </div>
+              <div style="padding:8px 10px;border-radius:var(--radius-xs);background:var(--cyan-dim);border:1px solid var(--cyan-mid)">
+                <span style="color:var(--muted);font-size:0.62rem">&#129302; Claude &mdash; <code style="font-size:0.58rem;color:var(--cyan)">get_actuals_report</code> (전주 비교)</span>
+                <div style="color:var(--ink);margin-top:2px">"카카오 CPA가 전주 대비 +23% 상승했습니다. 원인을 보면 클릭수는 비슷한데 설치 전환율이 7.2% &rarr; 5.1%로 떨어졌네요. 비즈보드 캠페인 2개가 전환율 하락을 주도하고 있습니다. 해당 캠페인 소재를 점검해보시는 게 좋겠습니다."</div>
+              </div>
+            </div>
+          </div>
+          <!-- Scenario 2: 주간 리포트 -->
+          <div class="card" style="padding:16px;border-left:3px solid var(--amber)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+              <div class="step-badge" style="background:var(--amber-dim);border-color:rgba(251,191,36,0.2);color:var(--amber)">SCENARIO 2</div>
+              <h3 style="font-size:0.85rem">주간 리포트 생성</h3>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:0.75rem">
+              <div style="padding:8px 10px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line)">
+                <span style="color:var(--muted);font-size:0.62rem">&#128100; 마케터</span>
+                <div style="color:var(--ink);margin-top:2px">"지난주 전체 성과 요약 리포트 만들어줘. 팀 슬랙에 공유할 거야"</div>
+              </div>
+              <div style="padding:8px 10px;border-radius:var(--radius-xs);background:var(--amber-dim);border:1px solid rgba(251,191,36,0.2)">
+                <span style="color:var(--muted);font-size:0.62rem">&#129302; Claude &mdash; <code style="font-size:0.58rem;color:var(--amber)">get_actuals_report</code> + <code style="font-size:0.58rem;color:var(--amber)">get_revenue_report</code></span>
+                <div style="color:var(--ink);margin-top:2px">"<strong>주간 성과 요약 (3/3~3/9)</strong><br/>총 설치: 28,420건 (전주 대비 +8%)<br/>총 비용: &#8361;148M / 총 매출: &#8361;412M / ROAS: 2.78x<br/>Top 캠페인: Google_Brand_AOS (+34% 매출 기여)<br/>주의 필요: Kakao_BizBoard CPA 3일 연속 상승 중<br/><br/>슬랙에 바로 붙여넣기 가능한 포맷으로 정리해드릴까요?"</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ╔══════════════════════════════════════════╗ -->
+    <!-- ║   PART 04 — 경쟁 현황                     ║ -->
+    <!-- ╚══════════════════════════════════════════╝ -->
+
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="part-divider">
+          <div class="part-left stagger">
+            <span class="part-section-badge">SECTION</span>
+            <div class="part-label">PART</div>
+            <div class="part-num">04</div>
+            <div class="part-bar"></div>
+          </div>
+          <div class="part-right stagger">
+            <h2>경쟁 현황</h2>
+            <div class="part-sub">Competitive Landscape</div>
+            <div class="part-agenda">
+              <div class="part-agenda-item"><span class="part-agenda-num">01</span><div class="part-agenda-text"><strong>경쟁사 MCP 실전 모습</strong><span>AppsFlyer, Singular, Kochava 실사용 비교</span></div></div>
+              <div class="part-agenda-item"><span class="part-agenda-num">02</span><div class="part-agenda-text"><strong>MMP AI 레이스</strong><span>타임라인 + 기능별 비교표</span></div></div>
+              <div class="part-agenda-item"><span class="part-agenda-num">03</span><div class="part-agenda-text"><strong>PA 생태계 현황</strong><span>Amplitude, Mixpanel, Pendo 등</span></div></div>
+              <div class="part-agenda-item"><span class="part-agenda-num">04</span><div class="part-agenda-text"><strong>So What</strong><span>Airbridge가 해야 할 것</span></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="part-footer">PART 4 STRUCTURE</div>
+      </div>
+    </section>
+
+    <!-- ── 경쟁사 MCP 실전 모습 ── -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="slide-header stagger">
+          <h2>경쟁사 MCP 실전 모습<span class="sep">|</span><span class="en">How They Actually Work</span></h2>
+        </div>
+        <p class="stagger" style="color:var(--ink-secondary);font-size:0.88rem;margin-bottom:16px">각 MMP가 실제로 MCP를 어떤 형태로 제공하고 있는지</p>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px" class="stagger">
+
+          <!-- AppsFlyer -->
+          <div class="card" style="border-top:3px solid var(--rose);padding:0;overflow:hidden">
+            <div style="padding:14px 16px 10px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                <h3 style="font-size:0.95rem">AppsFlyer</h3>
+                <span style="font-size:0.6rem;padding:2px 7px;border-radius:3px;background:var(--rose-dim);color:var(--rose)">Open Beta</span>
+              </div>
+              <img src="assets/competitor-appsflyer.png" alt="AppsFlyer MCP on ChatGPT" style="width:100%;height:160px;border-radius:var(--radius-xs);object-fit:cover"/>
+            </div>
+            <div style="padding:10px 16px;display:flex;flex-wrap:wrap;gap:4px;font-size:0.65rem;border-top:1px solid var(--line)">
+              <span style="padding:2px 6px;border-radius:3px;background:var(--bg-card);color:var(--ink-secondary)">Claude</span>
+              <span style="padding:2px 6px;border-radius:3px;background:var(--bg-card);color:var(--ink-secondary)">ChatGPT</span>
+              <span style="padding:2px 6px;border-radius:3px;background:var(--bg-card);color:var(--ink-secondary)">Cursor</span>
+              <span style="padding:2px 6px;border-radius:3px;background:var(--bg-card);color:var(--ink-secondary)">OAuth</span>
+              <span style="padding:2px 6px;border-radius:3px;background:var(--rose-dim);color:var(--rose)">Read + Write</span>
+              <span style="padding:2px 6px;border-radius:3px;background:var(--bg-card);color:var(--ink-secondary)">n8n</span>
+            </div>
+          </div>
+
+          <!-- Singular -->
+          <div class="card" style="border-top:3px solid var(--blue);padding:0;overflow:hidden">
+            <div style="padding:14px 16px 10px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                <h3 style="font-size:0.95rem">Singular</h3>
+                <span style="font-size:0.6rem;padding:2px 7px;border-radius:3px;background:var(--blue-dim);color:var(--blue)">GA</span>
+              </div>
+              <img src="assets/competitor-singular.png" alt="Singular MCP on Claude" style="width:100%;height:160px;border-radius:var(--radius-xs);object-fit:cover"/>
+            </div>
+            <div style="padding:10px 16px;display:flex;flex-wrap:wrap;gap:4px;font-size:0.65rem;border-top:1px solid var(--line)">
+              <span style="padding:2px 6px;border-radius:3px;background:var(--bg-card);color:var(--ink-secondary)">ChatGPT</span>
+              <span style="padding:2px 6px;border-radius:3px;background:var(--bg-card);color:var(--ink-secondary)">Claude</span>
+              <span style="padding:2px 6px;border-radius:3px;background:var(--bg-card);color:var(--ink-secondary)">Cursor</span>
+              <span style="padding:2px 6px;border-radius:3px;background:var(--bg-card);color:var(--ink-secondary)">OAuth</span>
+              <span style="padding:2px 6px;border-radius:3px;background:var(--blue-dim);color:var(--blue)">Read 중심</span>
+            </div>
+          </div>
+
+          <!-- Kochava -->
+          <div class="card" style="border-top:3px solid var(--amber);padding:0;overflow:hidden">
+            <div style="padding:14px 16px 10px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                <h3 style="font-size:0.95rem">Kochava</h3>
+                <span style="font-size:0.6rem;padding:2px 7px;border-radius:3px;background:var(--amber-dim);color:var(--amber)">Private Beta</span>
+              </div>
+              <img src="assets/competitor-kochava.png" alt="Kochava StationOne Desktop" style="width:100%;height:160px;border-radius:var(--radius-xs);object-fit:cover"/>
+            </div>
+            <div style="padding:10px 16px;display:flex;flex-wrap:wrap;gap:4px;font-size:0.65rem;border-top:1px solid var(--line)">
+              <span style="padding:2px 6px;border-radius:3px;background:var(--bg-card);color:var(--ink-secondary)">자체 앱</span>
+              <span style="padding:2px 6px;border-radius:3px;background:var(--bg-card);color:var(--ink-secondary)">로컬 실행</span>
+              <span style="padding:2px 6px;border-radius:3px;background:var(--bg-card);color:var(--ink-secondary)">Agent Forge</span>
+              <span style="padding:2px 6px;border-radius:3px;background:var(--amber-dim);color:var(--amber)">Read-only</span>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="stagger" style="margin-top:10px;display:flex;gap:8px;font-size:0.65rem">
+          <a href="https://www.youtube.com/watch?v=8lWokh8fneE&amp;list=PLTkWFRcH27jzj-XPLvkMt4uik4UrHpWku&amp;index=1" target="_blank" style="flex:1;padding:6px 10px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line);color:var(--ink-secondary);text-decoration:none;text-align:center;transition:background 0.15s">&#127909; AppsFlyer 데모 영상</a>
+          <a href="https://www.youtube.com/watch?v=Fw_GLvzKkq0" target="_blank" style="flex:1;padding:6px 10px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line);color:var(--ink-secondary);text-decoration:none;text-align:center;transition:background 0.15s">&#127909; Singular 데모 영상</a>
+          <a href="https://www.kochava.com/stationone/" target="_blank" style="flex:1;padding:6px 10px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line);color:var(--ink-secondary);text-decoration:none;text-align:center;transition:background 0.15s">&#128279; Kochava StationOne</a>
+        </div>
+
+        <div class="conclusion-bar stagger" style="margin-top:10px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          모두 "자연어로 데이터 질의"는 동일 &mdash; 차이는 <strong>인증 방식, 도메인 지식 리소스, 플랫폼 접근성</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── MMP AI 레이스 + 비교표 ── -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="slide-header stagger">
+          <h2>MMP AI 레이스<span class="sep">|</span><span class="en">Timeline + Comparison</span></h2>
+        </div>
+
+        <!-- 타임라인 바 -->
+        <div class="stagger" style="margin-bottom:16px">
+          <svg viewBox="0 0 700 70" style="width:100%">
+            <defs>
+              <clipPath id="clip-af"><circle cx="140" cy="30" r="11"/></clipPath>
+              <clipPath id="clip-sg"><circle cx="280" cy="30" r="11"/></clipPath>
+              <clipPath id="clip-kc"><circle cx="420" cy="30" r="11"/></clipPath>
+              <clipPath id="clip-ab"><circle cx="580" cy="30" r="13"/></clipPath>
+            </defs>
+
+            <!-- 배경 라인 -->
+            <line x1="40" y1="30" x2="660" y2="30" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+            <line x1="40" y1="30" x2="580" y2="30" stroke="rgba(45,212,191,0.25)" stroke-width="2"/>
+
+            <!-- AppsFlyer: 2025.07 -->
+            <circle cx="140" cy="30" r="12" fill="#1a1a2e" stroke="#fb7185" stroke-width="1.5"/>
+            <image href="assets/logos/appsflyer.png" x="129" y="19" width="22" height="22" clip-path="url(#clip-af)" preserveAspectRatio="xMidYMid slice"/>
+            <text x="140" y="56" text-anchor="middle" font-size="7" fill="#94a3b8">2025.07</text>
+            <text x="140" y="12" text-anchor="middle" font-size="6.5" fill="#fb7185">Open Beta</text>
+
+            <!-- Singular: 2025.08 -->
+            <circle cx="280" cy="30" r="12" fill="#1a1a2e" stroke="#60a5fa" stroke-width="1.5"/>
+            <image href="assets/logos/singular.png" x="269" y="19" width="22" height="22" clip-path="url(#clip-sg)" preserveAspectRatio="xMidYMid slice"/>
+            <text x="280" y="56" text-anchor="middle" font-size="7" fill="#94a3b8">2025.08</text>
+            <text x="280" y="12" text-anchor="middle" font-size="6.5" fill="#60a5fa">GA</text>
+
+            <!-- Kochava: 2025.11 -->
+            <circle cx="420" cy="30" r="12" fill="#1a1a2e" stroke="#fbbf24" stroke-width="1.5"/>
+            <image href="assets/logos/kochava.png" x="409" y="19" width="22" height="22" clip-path="url(#clip-kc)" preserveAspectRatio="xMidYMid slice"/>
+            <text x="420" y="56" text-anchor="middle" font-size="7" fill="#94a3b8">2025.11</text>
+            <text x="420" y="12" text-anchor="middle" font-size="6.5" fill="#fbbf24">Pvt. Beta</text>
+
+            <!-- Airbridge: 2026.03 -->
+            <circle cx="580" cy="30" r="14" fill="#1a1a2e" stroke="#2dd4bf" stroke-width="2"/>
+            <image href="assets/logos/airbridge.png" x="567" y="17" width="26" height="26" clip-path="url(#clip-ab)" preserveAspectRatio="xMidYMid slice"/>
+            <text x="580" y="56" text-anchor="middle" font-size="7" fill="#2dd4bf" font-weight="600">2026.03</text>
+            <text x="580" y="12" text-anchor="middle" font-size="6.5" fill="#2dd4bf">Beta</text>
+
+            <!-- Future -->
+            <text x="660" y="33" text-anchor="middle" font-size="7" fill="#64748b">Future</text>
+            <text x="660" y="12" text-anchor="middle" font-size="6" fill="#64748b">Write, Agent</text>
+            <line x1="620" y1="30" x2="660" y2="30" stroke="rgba(255,255,255,0.08)" stroke-width="2" stroke-dasharray="4,3"/>
+          </svg>
+        </div>
+
+        <table class="cmp-table stagger">
+          <thead>
+            <tr>
+              <th style="width:13%"></th>
+              <th style="width:15%">AppsFlyer</th>
+              <th style="width:14%">Singular</th>
+              <th style="width:14%">Kochava</th>
+              <th class="highlight" style="width:15%">Airbridge</th>
+              <th style="width:14%">Adjust</th>
+              <th style="width:15%">Branch</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:600">MCP 상태</td>
+              <td style="color:var(--amber)">Open Beta</td>
+              <td>GA</td>
+              <td style="color:var(--amber)">Private Beta</td>
+              <td class="highlight" style="color:var(--cyan);font-weight:600">Beta</td>
+              <td class="cross">공식 MCP 없음</td>
+              <td class="cross">공식 MCP 없음</td>
+            </tr>
+            <tr>
+              <td style="font-weight:600">접근 방식</td>
+              <td style="font-size:0.72rem">표준 MCP 서버</td>
+              <td style="font-size:0.72rem">표준 MCP 서버</td>
+              <td style="font-size:0.72rem">자체 AI 허브<br/>(데스크톱 앱)</td>
+              <td class="highlight" style="font-size:0.72rem">표준 MCP 서버</td>
+              <td style="font-size:0.72rem">자체 챗봇<br/>(MCP 아님)</td>
+              <td style="font-size:0.72rem">자체 내장 AI<br/>(MCP 아님)</td>
+            </tr>
+            <tr>
+              <td style="font-weight:600">인증 방식</td>
+              <td>OAuth</td>
+              <td>OAuth</td>
+              <td>로컬 실행</td>
+              <td class="highlight" style="font-weight:600">OAuth 2.1 + PKCE</td>
+              <td class="cross">-</td>
+              <td class="cross">-</td>
+            </tr>
+            <tr>
+              <td style="font-weight:600">데이터 권한</td>
+              <td style="font-size:0.72rem">Read + Write</td>
+              <td style="font-size:0.72rem">Read 중심</td>
+              <td style="font-size:0.72rem">Read-only<br/><span style="color:var(--muted)">(Write 예정)</span></td>
+              <td class="highlight" style="font-size:0.72rem">Read-only</td>
+              <td class="cross">-</td>
+              <td class="cross">-</td>
+            </tr>
+            <tr>
+              <td style="font-weight:600">지원 클라이언트</td>
+              <td style="font-size:0.72rem">Claude, ChatGPT<br/>Cursor, VS Code</td>
+              <td style="font-size:0.72rem">Claude, ChatGPT<br/>Cursor</td>
+              <td style="font-size:0.72rem">자체 클라이언트<br/>(모델 독립)</td>
+              <td class="highlight" style="font-size:0.72rem">Claude, ChatGPT<br/>Cursor, VS Code</td>
+              <td style="font-size:0.72rem">Growth Copilot<br/>(자체 챗봇)</td>
+              <td style="font-size:0.72rem">Ivy AI<br/>(대시보드 내장)</td>
+            </tr>
+            <tr>
+              <td style="font-weight:600">차별화</td>
+              <td style="font-size:0.72rem">6개 도메인 커버<br/>n8n 자동화 연동</td>
+              <td style="font-size:0.72rem">ChatGPT 최초<br/>속도 개선 사례</td>
+              <td style="font-size:0.72rem">자체 AI 플랫폼<br/>Agent Forge</td>
+              <td class="highlight" style="font-size:0.72rem"><strong>OAuth 2.1 + PKCE</strong><br/>+ 가이드 리소스</td>
+              <td style="font-size:0.72rem">내장 AI 챗봇<br/>(MCP 아님)</td>
+              <td style="font-size:0.72rem">Ivy AI 내장<br/>링크 자동 생성</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="conclusion-bar danger stagger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          9개월 후발이지만 &mdash; 경쟁사가 겪은 시행착오를 건너뛴 설계 <strong>(OAuth 2.1 + PKCE, 가이드 리소스)</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── PA 생태계 현황 ── -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="slide-header stagger">
+          <h2>MCP 생태계<span class="sep">|</span><span class="en">Beyond MMP</span></h2>
+        </div>
+        <p class="stagger" style="color:var(--ink-secondary);font-size:0.88rem;margin-bottom:18px">MMP뿐 아니라 <strong class="text-cyan">마케터가 매일 쓰는 PA/마케팅 도구</strong>도 MCP를 지원하기 시작</p>
+
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px" class="stagger">
+          <!-- Amplitude -->
+          <div class="card" style="padding:16px;border-left:3px solid var(--violet)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <h3 style="font-size:0.9rem;color:var(--violet)">Amplitude</h3>
+              <span style="font-size:0.6rem;padding:2px 7px;border-radius:3px;background:var(--violet-dim);color:var(--violet)">공식 MCP</span>
+            </div>
+            <div style="font-size:0.75rem;color:var(--ink-secondary);line-height:1.5">
+              차트, 대시보드, 코호트, 실험<br/>
+              <span style="color:var(--violet)">모든 플랜에서 사용 가능</span>
+            </div>
+            <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:3px">
+              <span style="font-size:0.6rem;padding:2px 5px;border-radius:3px;background:var(--bg-card);color:var(--muted)">Claude</span>
+              <span style="font-size:0.6rem;padding:2px 5px;border-radius:3px;background:var(--bg-card);color:var(--muted)">Cursor</span>
+              <span style="font-size:0.6rem;padding:2px 5px;border-radius:3px;background:var(--bg-card);color:var(--muted)">ChatGPT</span>
+            </div>
+          </div>
+          <!-- Mixpanel -->
+          <div class="card" style="padding:16px;border-left:3px solid var(--amber)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <h3 style="font-size:0.9rem;color:var(--amber)">Mixpanel</h3>
+              <span style="font-size:0.6rem;padding:2px 7px;border-radius:3px;background:var(--amber-dim);color:var(--amber)">공식 Beta</span>
+            </div>
+            <div style="font-size:0.75rem;color:var(--ink-secondary);line-height:1.5">
+              세그먼트, 퍼널, 리텐션, 빈도<br/>
+              <span style="color:var(--amber)">자연어로 리포트 생성</span>
+            </div>
+            <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:3px">
+              <span style="font-size:0.6rem;padding:2px 5px;border-radius:3px;background:var(--bg-card);color:var(--muted)">Claude</span>
+              <span style="font-size:0.6rem;padding:2px 5px;border-radius:3px;background:var(--bg-card);color:var(--muted)">Cursor</span>
+            </div>
+          </div>
+          <!-- PostHog -->
+          <div class="card" style="padding:16px;border-left:3px solid var(--blue)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <h3 style="font-size:0.9rem;color:var(--blue)">PostHog</h3>
+              <span style="font-size:0.6rem;padding:2px 7px;border-radius:3px;background:var(--blue-dim);color:var(--blue)">공식 MCP</span>
+            </div>
+            <div style="font-size:0.75rem;color:var(--ink-secondary);line-height:1.5">
+              이벤트, 퍼널, 피처플래그, A/B 테스트<br/>
+              <span style="color:var(--blue)">오픈소스 PA 플랫폼</span>
+            </div>
+            <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:3px">
+              <span style="font-size:0.6rem;padding:2px 5px;border-radius:3px;background:var(--bg-card);color:var(--muted)">Claude</span>
+              <span style="font-size:0.6rem;padding:2px 5px;border-radius:3px;background:var(--bg-card);color:var(--muted)">Cursor</span>
+            </div>
+          </div>
+          <!-- Pendo -->
+          <div class="card" style="padding:16px;border-left:3px solid var(--cyan)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <h3 style="font-size:0.9rem;color:var(--cyan)">Pendo</h3>
+              <span style="font-size:0.6rem;padding:2px 7px;border-radius:3px;background:var(--cyan-dim);color:var(--cyan)">공식 Beta</span>
+            </div>
+            <div style="font-size:0.75rem;color:var(--ink-secondary);line-height:1.5">
+              방문자, 기능 사용, 세그먼트<br/>
+              <span style="color:var(--cyan)">프로덕트 분석 특화</span>
+            </div>
+            <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:3px">
+              <span style="font-size:0.6rem;padding:2px 5px;border-radius:3px;background:var(--bg-card);color:var(--muted)">Claude</span>
+              <span style="font-size:0.6rem;padding:2px 5px;border-radius:3px;background:var(--bg-card);color:var(--muted)">Cursor</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px" class="stagger">
+          <!-- Braze -->
+          <div class="card" style="padding:14px;border-left:3px solid var(--rose)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <h3 style="font-size:0.85rem;color:var(--rose)">Braze</h3>
+              <span style="font-size:0.6rem;padding:2px 7px;border-radius:3px;background:var(--rose-dim);color:var(--rose)">MCP 발표</span>
+            </div>
+            <div style="font-size:0.72rem;color:var(--ink-secondary)">CRM/마케팅 자동화</div>
+          </div>
+          <!-- GA4 -->
+          <div class="card" style="padding:14px;border-left:3px solid var(--muted)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <h3 style="font-size:0.85rem;color:var(--muted)">GA4</h3>
+              <span style="font-size:0.6rem;padding:2px 7px;border-radius:3px;background:var(--bg-card);color:var(--muted)">Gemini 내장</span>
+            </div>
+            <div style="font-size:0.72rem;color:var(--ink-secondary)">MCP 아닌 자체 AI</div>
+          </div>
+          <!-- Segment -->
+          <div class="card" style="padding:14px;border-left:3px solid var(--muted)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <h3 style="font-size:0.85rem;color:var(--muted)">Segment</h3>
+              <span style="font-size:0.6rem;padding:2px 7px;border-radius:3px;background:var(--bg-card);color:var(--muted)">커뮤니티</span>
+            </div>
+            <div style="font-size:0.72rem;color:var(--ink-secondary)">비공식 MCP 서버</div>
+          </div>
+        </div>
+
+        <div class="stagger" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;font-size:0.62rem">
+          <a href="https://amplitude.com/mcp-server" target="_blank" style="padding:5px 10px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line);color:var(--violet);text-decoration:none;transition:background 0.15s">&#128279; Amplitude MCP</a>
+          <a href="https://mixpanel.com/blog/mixpanel-mcp-server/" target="_blank" style="padding:5px 10px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line);color:var(--amber);text-decoration:none;transition:background 0.15s">&#128279; Mixpanel MCP</a>
+          <a href="https://www.pendo.io/product/mcp/" target="_blank" style="padding:5px 10px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line);color:var(--cyan);text-decoration:none;transition:background 0.15s">&#128279; Pendo MCP</a>
+          <a href="https://www.braze.com/resources/articles/introducing-braze-mcp-server" target="_blank" style="padding:5px 10px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line);color:var(--rose);text-decoration:none;transition:background 0.15s">&#128279; Braze MCP</a>
+        </div>
+
+        <div class="conclusion-bar stagger" style="margin-top:10px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          마케터의 도구 스택 전체가 MCP로 연결되는 중 &mdash; <strong>Airbridge MCP는 이 생태계의 MMP 허브</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── So What — Airbridge가 해야 할 것 ── -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="slide-header stagger">
+          <h2>So What<span class="sep">|</span><span class="en">What Airbridge Should Do</span></h2>
+        </div>
+        <p class="stagger" style="color:var(--ink-secondary);font-size:0.88rem;margin-bottom:20px">경쟁사 분석에서 얻은 시사점 &mdash; <strong class="text-cyan">NOW / NEXT / FUTURE</strong></p>
+
+        <div style="display:flex;flex-direction:column;gap:14px" class="stagger">
+          <!-- NOW -->
+          <div class="card" style="padding:18px;border-left:4px solid var(--cyan)">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+              <span style="font-size:0.7rem;font-weight:700;padding:3px 10px;border-radius:4px;background:var(--cyan-dim);color:var(--cyan);font-family:Outfit,sans-serif;letter-spacing:0.5px">NOW</span>
+              <span style="font-size:0.78rem;color:var(--ink);font-weight:600">현재 Beta에서 이미 확보한 것</span>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <div style="flex:1;min-width:180px;padding:8px 12px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line);font-size:0.75rem">
+                <strong style="color:var(--cyan)">OAuth 2.1 + PKCE</strong><br/><span style="color:var(--ink-secondary)">경쟁사 대비 최신 보안 표준 선점</span>
+              </div>
+              <div style="flex:1;min-width:180px;padding:8px 12px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line);font-size:0.75rem">
+                <strong style="color:var(--cyan)">가이드 리소스</strong><br/><span style="color:var(--ink-secondary)">환각 방지 — 경쟁사에 없는 차별화</span>
+              </div>
+              <div style="flex:1;min-width:180px;padding:8px 12px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line);font-size:0.75rem">
+                <strong style="color:var(--cyan)">후발 주자의 이점</strong><br/><span style="color:var(--ink-secondary)">경쟁사 시행착오를 학습 — 최적 설계로 시작</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- NEXT -->
+          <div class="card" style="padding:18px;border-left:4px solid var(--blue)">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+              <span style="font-size:0.7rem;font-weight:700;padding:3px 10px;border-radius:4px;background:var(--blue-dim);color:var(--blue);font-family:Outfit,sans-serif;letter-spacing:0.5px">NEXT</span>
+              <span style="font-size:0.78rem;color:var(--ink);font-weight:600">단기 로드맵 시사점</span>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <div style="flex:1;min-width:180px;padding:8px 12px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line);font-size:0.75rem">
+                <strong style="color:var(--blue)">Write 기능 추가</strong><br/><span style="color:var(--ink-secondary)">트래킹 링크 생성 등 — 전 MMP 중 선점 가능</span>
+              </div>
+              <div style="flex:1;min-width:180px;padding:8px 12px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line);font-size:0.75rem">
+                <strong style="color:var(--blue)">PA 도구 연동 가이드</strong><br/><span style="color:var(--ink-secondary)">Amplitude + Airbridge MCP 조합 시나리오</span>
+              </div>
+              <div style="flex:1;min-width:180px;padding:8px 12px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line);font-size:0.75rem">
+                <strong style="color:var(--blue)">고객 성공 사례</strong><br/><span style="color:var(--ink-secondary)">Singular처럼 "몇 시간 &rarr; 몇 분" 사례 확보</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- FUTURE -->
+          <div class="card" style="padding:18px;border-left:4px solid var(--violet);border-style:dashed;border-left-style:dashed">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+              <span style="font-size:0.7rem;font-weight:700;padding:3px 10px;border-radius:4px;background:var(--violet-dim);color:var(--violet);font-family:Outfit,sans-serif;letter-spacing:0.5px">FUTURE</span>
+              <span style="font-size:0.78rem;color:var(--ink);font-weight:600">중장기 방향 — 경쟁사가 향하는 곳</span>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <div style="flex:1;min-width:200px;padding:8px 12px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line);font-size:0.75rem">
+                <strong style="color:var(--violet)">Agent Workflow</strong><br/><span style="color:var(--ink-secondary)">AppsFlyer가 Agentic AI로 강조하는 방향</span>
+              </div>
+              <div style="flex:1;min-width:200px;padding:8px 12px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line);font-size:0.75rem">
+                <strong style="color:var(--violet)">AI 오케스트레이션 허브</strong><br/><span style="color:var(--ink-secondary)">Kochava StationOne — 모델 독립, MCP 통합, 자체 에이전트 빌더</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="conclusion-bar stagger" style="margin-top:14px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          후발이 유리한 이유: <strong>시장이 검증한 방향에 더 나은 설계로 빠르게 진입</strong>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ╔══════════════════════════════════════════╗ -->
+    <!-- ║    PART 05 — 대안과 최신 동향              ║ -->
+    <!-- ╚══════════════════════════════════════════╝ -->
+
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="part-divider">
+          <div class="part-left stagger">
+            <span class="part-section-badge">SECTION</span>
+            <div class="part-label">PART</div>
+            <div class="part-num">05</div>
+            <div class="part-bar"></div>
+          </div>
+          <div class="part-right stagger">
+            <h2>MCP의 대안은 없을까?</h2>
+            <div class="part-sub">Limitations &amp; Alternatives</div>
+            <div class="part-agenda">
+              <div class="part-agenda-item"><span class="part-agenda-num">01</span><div class="part-agenda-text"><strong>MCP의 한계</strong><span>컨텍스트 소비 문제, "MCP is DEAD" 논란</span></div></div>
+              <div class="part-agenda-item"><span class="part-agenda-num">02</span><div class="part-agenda-text"><strong>대안 기술</strong><span>Skills, Direct API, A2A, CLI</span></div></div>
+              <div class="part-agenda-item"><span class="part-agenda-num">03</span><div class="part-agenda-text"><strong>균형 잡힌 시각</strong><span>MCP가 진짜 빛나는 순간</span></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="part-footer">PART 5 STRUCTURE</div>
+      </div>
+    </section>
+
+    <!-- ── MCP의 한계 ── -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="slide-header stagger">
+          <h2>MCP의 한계<span class="sep">|</span><span class="en">"MCP is DEAD" 논란</span></h2>
+        </div>
+        <p class="stagger" style="color:var(--ink-secondary);font-size:0.92rem;margin-bottom:20px">MCP는 강력하지만, 구조적 한계도 존재한다. 개발자 커뮤니티에서 제기되는 핵심 이슈들</p>
+        <div class="card-grid-2 stagger">
+          <div class="card" style="border-left:3px solid var(--rose);padding:18px">
+            <h3 style="color:var(--rose)">&#128165; 컨텍스트 소비 문제</h3>
+            <p style="margin-top:8px;font-size:0.78rem;line-height:1.6">MCP 서버를 연결하면 도구 설명(Tool Description)이 <strong>AI의 작업 공간(컨텍스트 윈도우)</strong>을 차지합니다</p>
+            <div style="margin-top:12px;display:flex;gap:8px">
+              <div style="flex:1;padding:8px;border-radius:var(--radius-xs);background:var(--rose-dim);text-align:center"><div style="font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:800;color:var(--rose)">5개</div><div style="font-size:0.65rem;color:var(--muted)">MCP 서버 연결</div></div>
+              <div style="flex:1;padding:8px;border-radius:var(--radius-xs);background:var(--rose-dim);text-align:center"><div style="font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:800;color:var(--rose)">1/3</div><div style="font-size:0.65rem;color:var(--muted)">작업 공간 증발</div></div>
+            </div>
+          </div>
+          <div class="card" style="border-left:3px solid var(--amber);padding:18px">
+            <h3 style="color:var(--amber)">&#9888; 기타 이슈</h3>
+            <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px;font-size:0.78rem">
+              <div style="padding:8px 10px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line)"><strong>속도 저하</strong> &mdash; 매 요청마다 도구 목록 전송, 응답 지연</div>
+              <div style="padding:8px 10px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line)"><strong>인증 반복</strong> &mdash; 세션 만료 시 재로그인 필요</div>
+              <div style="padding:8px 10px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line)"><strong>보안 우려</strong> &mdash; 제3자 MCP 서버의 데이터 처리 신뢰성</div>
+              <div style="padding:8px 10px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line)"><strong>환각 리스크</strong> &mdash; AI가 도구를 잘못 호출할 가능성</div>
+            </div>
+          </div>
+        </div>
+        <div class="stagger" style="margin-top:16px;padding:16px 20px;border-radius:var(--radius-sm);background:var(--bg-card);border:1px solid var(--line)">
+          <div style="font-size:0.72rem;color:var(--muted);margin-bottom:8px">&#127828; 레스토랑 비유</div>
+          <p style="font-size:0.82rem;color:var(--ink-secondary);line-height:1.6">MCP는 식당에 10개의 메뉴판을 펼쳐놓는 것과 같습니다. <strong style="color:var(--ink)">메뉴를 읽는 데만 시간이 가고, 정작 요리할 공간이 부족</strong>해집니다. 연결만 많다고 좋은 것이 아닙니다.</p>
+        </div>
+        <div class="conclusion-bar warning stagger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          "잘 연결하는 것"보다 "잘 가르치는 것"이 더 중요할 수 있다
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 대안 기술 ── -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="slide-header stagger">
+          <h2>대안 기술들<span class="sep">|</span><span class="en">Skills, API, A2A, CLI</span></h2>
+        </div>
+        <div class="card-grid-4 stagger">
+          <div class="card" style="border-top:3px solid var(--violet);padding:16px">
+            <div class="step-badge" style="background:var(--violet-dim);border-color:rgba(167,139,250,0.2);color:var(--violet)">ALTERNATIVE 1</div>
+            <h3 style="margin-top:8px;font-size:0.82rem">Skills / Prompts</h3>
+            <p style="margin-top:6px;font-size:0.72rem;line-height:1.5">도구 연결 대신 AI에게 <strong>작업 방법을 가르침</strong>. 컨텍스트를 훨씬 적게 소비</p>
+            <div style="margin-top:10px;padding:6px 8px;border-radius:var(--radius-xs);background:var(--violet-dim);font-size:0.68rem;color:var(--violet)">비유: 메뉴판 대신 도서관 사서</div>
+            <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:3px">
+              <div style="font-size:0.64rem;padding:2px 6px;border-radius:3px;background:var(--cyan-dim);color:var(--cyan)">컨텍스트 절약</div>
+              <div style="font-size:0.64rem;padding:2px 6px;border-radius:3px;background:var(--amber-dim);color:var(--amber)">실시간 데이터 &#10007;</div>
+            </div>
+          </div>
+          <div class="card" style="border-top:3px solid var(--blue);padding:16px">
+            <div class="step-badge" style="background:var(--blue-dim);border-color:rgba(96,165,250,0.2);color:var(--blue)">ALTERNATIVE 2</div>
+            <h3 style="margin-top:8px;font-size:0.82rem">Direct API Integration</h3>
+            <p style="margin-top:6px;font-size:0.72rem;line-height:1.5">AI 플랫폼이 직접 API를 호출. ChatGPT Actions, Function Calling 등</p>
+            <div style="margin-top:10px;padding:6px 8px;border-radius:var(--radius-xs);background:var(--blue-dim);font-size:0.68rem;color:var(--blue)">플랫폼 종속적 &mdash; 호환성 없음</div>
+            <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:3px">
+              <div style="font-size:0.64rem;padding:2px 6px;border-radius:3px;background:var(--cyan-dim);color:var(--cyan)">직접 연결</div>
+              <div style="font-size:0.64rem;padding:2px 6px;border-radius:3px;background:var(--rose-dim);color:var(--rose)">표준 아님</div>
+            </div>
+          </div>
+          <div class="card" style="border-top:3px solid var(--amber);padding:16px">
+            <div class="step-badge" style="background:var(--amber-dim);border-color:rgba(251,191,36,0.2);color:var(--amber)">ALTERNATIVE 3</div>
+            <h3 style="margin-top:8px;font-size:0.82rem">A2A Protocol</h3>
+            <p style="margin-top:6px;font-size:0.72rem;line-height:1.5">Google 주도. Agent-to-Agent 통신. MCP와 상호보완적 관계</p>
+            <div style="margin-top:10px;padding:6px 8px;border-radius:var(--radius-xs);background:var(--amber-dim);font-size:0.68rem;color:var(--amber)">MCP = 도구 연결 / A2A = 에이전트 협업</div>
+            <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:3px">
+              <div style="font-size:0.64rem;padding:2px 6px;border-radius:3px;background:var(--cyan-dim);color:var(--cyan)">에이전트 간 통신</div>
+              <div style="font-size:0.64rem;padding:2px 6px;border-radius:3px;background:var(--amber-dim);color:var(--amber)">초기 단계</div>
+            </div>
+          </div>
+          <div class="card" style="border-top:3px solid var(--rose);padding:16px">
+            <div class="step-badge" style="background:var(--rose-dim);border-color:rgba(251,113,133,0.2);color:var(--rose)">ALTERNATIVE 4</div>
+            <h3 style="margin-top:8px;font-size:0.82rem">CLI (Command Line)</h3>
+            <p style="margin-top:6px;font-size:0.72rem;line-height:1.5">AI가 기존 CLI 도구(<code>gh</code>, <code>aws</code>, <code>stripe</code>)를 셸에서 직접 호출. 토큰 최대 94% 절약</p>
+            <div style="margin-top:10px;padding:6px 8px;border-radius:var(--radius-xs);background:var(--rose-dim);font-size:0.68rem;color:var(--rose)">비유: 직접 주방에 들어가서 요리</div>
+            <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:3px">
+              <div style="font-size:0.64rem;padding:2px 6px;border-radius:3px;background:var(--cyan-dim);color:var(--cyan)">토큰 효율 극대</div>
+              <div style="font-size:0.64rem;padding:2px 6px;border-radius:3px;background:var(--amber-dim);color:var(--amber)">표준 없음</div>
+            </div>
+          </div>
+        </div>
+        <div class="stagger" style="margin-top:16px">
+          <table class="cmp-table">
+            <thead><tr><th></th><th>MCP</th><th>Skills</th><th>Direct API</th><th>A2A</th><th>CLI</th></tr></thead>
+            <tbody>
+              <tr><td style="font-weight:600">실시간 데이터</td><td class="check">&#10003;</td><td class="cross">&#10007;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr>
+              <tr><td style="font-weight:600">표준 호환성</td><td class="check">&#10003;</td><td class="cross">&#10007;</td><td class="cross">&#10007;</td><td class="check">&#10003;</td><td class="cross">&#10007;</td></tr>
+              <tr><td style="font-weight:600">컨텍스트 효율</td>
+                <td><span class="lvl rose"><span class="d on"></span><span class="d"></span><span class="d"></span><span class="d"></span></span></td>
+                <td><span class="lvl"><span class="d on"></span><span class="d on"></span><span class="d on"></span><span class="d"></span></span></td>
+                <td><span class="lvl amber"><span class="d on"></span><span class="d on"></span><span class="d"></span><span class="d"></span></span></td>
+                <td><span class="lvl amber"><span class="d on"></span><span class="d on"></span><span class="d"></span><span class="d"></span></span></td>
+                <td><span class="lvl"><span class="d on"></span><span class="d on"></span><span class="d on"></span><span class="d on"></span></span></td>
+              </tr>
+              <tr><td style="font-weight:600">성숙도</td>
+                <td><span class="lvl"><span class="d on"></span><span class="d on"></span><span class="d on"></span><span class="d"></span></span></td>
+                <td><span class="lvl amber"><span class="d on"></span><span class="d on"></span><span class="d"></span><span class="d"></span></span></td>
+                <td><span class="lvl"><span class="d on"></span><span class="d on"></span><span class="d on"></span><span class="d"></span></span></td>
+                <td><span class="lvl rose"><span class="d on"></span><span class="d"></span><span class="d"></span><span class="d"></span></span></td>
+                <td><span class="lvl"><span class="d on"></span><span class="d on"></span><span class="d on"></span><span class="d on"></span></span></td>
+              </tr>
+              <tr><td style="font-weight:600">설치 난이도</td>
+                <td><span class="lvl amber"><span class="d on"></span><span class="d on"></span><span class="d"></span><span class="d"></span></span></td>
+                <td><span class="lvl"><span class="d on"></span><span class="d on"></span><span class="d on"></span><span class="d"></span></span></td>
+                <td><span class="lvl rose"><span class="d on"></span><span class="d"></span><span class="d"></span><span class="d"></span></span></td>
+                <td><span class="lvl rose"><span class="d on"></span><span class="d"></span><span class="d"></span><span class="d"></span></span></td>
+                <td><span class="lvl"><span class="d on"></span><span class="d on"></span><span class="d on"></span><span class="d"></span></span></td>
+              </tr>
+              <tr><td style="font-weight:600">엔터프라이즈 거버넌스</td>
+                <td><span class="lvl"><span class="d on"></span><span class="d on"></span><span class="d on"></span><span class="d"></span></span></td>
+                <td><span class="lvl rose"><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span></span></td>
+                <td><span class="lvl amber"><span class="d on"></span><span class="d on"></span><span class="d"></span><span class="d"></span></span></td>
+                <td><span class="lvl"><span class="d on"></span><span class="d on"></span><span class="d on"></span><span class="d"></span></span></td>
+                <td><span class="lvl rose"><span class="d on"></span><span class="d"></span><span class="d"></span><span class="d"></span></span></td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="margin-top:8px;font-size:0.68rem;color:var(--muted);line-height:1.5">* <strong>엔터프라이즈 거버넌스</strong>: 기업 환경에서 요구되는 통제 체계 &mdash; OAuth 인증, 권한 관리(RBAC), 도구 호출 감사 로그, 입력값 검증 등. "누가, 언제, 어떤 데이터에 접근했는지" 추적 가능해야 하는 요건.</div>
+          <div style="margin-top:6px;font-size:0.68rem;color:var(--muted);line-height:1.5">&nbsp;&nbsp;CLI에도 인증을 붙일 수 있지만(<code>gh auth</code>, <code>aws configure</code> 등), CLI마다 인증 방식이 제각각이고 도구 단위 권한 제어와 구조화된 감사 로그를 별도로 구축해야 합니다. MCP는 이를 <strong>프로토콜 스펙 레벨</strong>에서 표준화하므로 CLI 10개의 거버넌스를 따로 만드는 것보다 관리 비용이 낮습니다.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── MCP가 진짜 빛나는 순간 ── -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="slide-header stagger">
+          <h2>MCP가 진짜 빛나는 순간<span class="sep">|</span><span class="en">When MCP Shines</span></h2>
+        </div>
+        <p class="stagger" style="color:var(--ink-secondary);font-size:0.92rem;margin-bottom:20px">모든 상황에 MCP가 최선은 아닙니다. <strong class="text-cyan">MCP가 진짜 필요한 경우</strong>를 알아야 합니다</p>
+        <div class="card-grid-2 stagger">
+          <div class="card card-focus" style="padding:20px">
+            <h3 style="font-size:0.92rem">&#10003; MCP가 적합한 경우</h3>
+            <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;font-size:0.82rem">
+              <div style="padding:10px 12px;border-radius:var(--radius-xs);background:var(--cyan-dim);border:1px solid var(--cyan-mid);color:var(--ink)"><strong class="text-cyan">실시간 데이터가 필요할 때</strong><br/><span style="font-size:0.75rem;color:var(--muted)">"어제 캠페인 ROAS?" &rarr; 최신 데이터 직접 조회</span></div>
+              <div style="padding:10px 12px;border-radius:var(--radius-xs);background:var(--cyan-dim);border:1px solid var(--cyan-mid);color:var(--ink)"><strong class="text-cyan">복수 시스템 연결이 필요할 때</strong><br/><span style="font-size:0.75rem;color:var(--muted)">Airbridge + Slack + 스프레드시트 연동</span></div>
+              <div style="padding:10px 12px;border-radius:var(--radius-xs);background:var(--cyan-dim);border:1px solid var(--cyan-mid);color:var(--ink)"><strong class="text-cyan">표준 호환이 중요할 때</strong><br/><span style="font-size:0.75rem;color:var(--muted)">한 번 구축으로 Claude, ChatGPT, Cursor 모두 지원</span></div>
+            </div>
+          </div>
+          <div class="card" style="padding:20px;border-color:rgba(251,113,133,0.15)">
+            <h3 style="font-size:0.92rem">&#10007; MCP보다 다른 방법이 나은 경우</h3>
+            <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;font-size:0.82rem">
+              <div style="padding:10px 12px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line);color:var(--ink)"><strong class="text-muted">정적 지식 전달</strong><br/><span style="font-size:0.75rem;color:var(--muted)">가이드, 매뉴얼 &rarr; Skills/Prompts가 더 효율적</span></div>
+              <div style="padding:10px 12px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line);color:var(--ink)"><strong class="text-muted">단순 반복 작업</strong><br/><span style="font-size:0.75rem;color:var(--muted)">정해진 포맷 리포트 &rarr; 자동화 스크립트가 더 적합</span></div>
+              <div style="padding:10px 12px;border-radius:var(--radius-xs);background:var(--bg-card);border:1px solid var(--line);color:var(--ink)"><strong class="text-muted">컨텍스트가 제한적일 때</strong><br/><span style="font-size:0.75rem;color:var(--muted)">긴 대화 &rarr; 도구 설명이 공간 차지, 성능 저하</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="conclusion-bar stagger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M9 12l2 2 4-4"/></svg>
+          핵심: MCP + Skills + Direct API를 <strong>상황에 맞게 조합</strong>하는 것이 최선의 전략
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ══════════════ 레퍼런스 ══════════════ -->
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="slide-header stagger">
+          <h2>레퍼런스<span class="sep">|</span><span class="en">References &amp; Links</span></h2>
+        </div>
+        <div class="stagger" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <!-- MCP 공식 & 교육 -->
+          <div class="card" style="padding:16px;border-top:2px solid var(--cyan)">
+            <h3 style="font-size:0.82rem;margin-bottom:10px">&#128279; MCP 공식 &amp; 교육</h3>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <a class="ref-link" href="https://modelcontextprotocol.io/specification/2025-11-25" target="_blank"><strong>MCP Spec (2025-11-25)</strong> &mdash; 최신 공식 스펙<span class="ref-url">modelcontextprotocol.io/specification</span></a>
+              <a class="ref-link" href="https://github.com/modelcontextprotocol" target="_blank"><strong>MCP GitHub</strong> &mdash; 오픈소스 레포지토리<span class="ref-url">github.com/modelcontextprotocol</span></a>
+              <a class="ref-link" href="https://aaif.dev" target="_blank"><strong>Linux Foundation AAIF</strong> &mdash; MCP 거버넌스<span class="ref-url">aaif.dev</span></a>
+              <a class="ref-link" href="https://github.com/microsoft/mcp-for-beginners" target="_blank"><strong>MS MCP for Beginners</strong> &mdash; 11모듈, 6개 언어 실습 &#11088;<span class="ref-url">github.com/microsoft/mcp-for-beginners</span></a>
+              <a class="ref-link" href="https://www.pento.ai/blog/a-year-of-mcp-2025-review" target="_blank"><strong>MCP 1년 회고 (Pento)</strong> &mdash; 타임라인 + 9,700만 월간 SDK DL<span class="ref-url">pento.ai/blog/a-year-of-mcp-2025-review</span></a>
+            </div>
+          </div>
+          <!-- 경쟁사 MCP -->
+          <div class="card" style="padding:16px;border-top:2px solid var(--rose)">
+            <h3 style="font-size:0.82rem;margin-bottom:10px">&#128187; 경쟁사 MCP</h3>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <a class="ref-link" href="https://www.appsflyer.com/products/agentic-ai/mcp/" target="_blank"><strong>AppsFlyer MCP (Beta)</strong> &mdash; 제품 랜딩 + 데모 &#11088;<span class="ref-url">appsflyer.com/products/agentic-ai/mcp</span></a>
+              <a class="ref-link" href="https://www.appsflyer.com/blog/measurement-analytics/mcp-ai-workflows/" target="_blank"><strong>AppsFlyer Workflows</strong> &mdash; n8n 자동화 실전 예시 &#11088;<span class="ref-url">appsflyer.com/blog/.../mcp-ai-workflows</span></a>
+              <a class="ref-link" href="https://www.singular.net/blog/singular-chatgpt-mcp/" target="_blank"><strong>Singular ChatGPT MCP</strong> &mdash; "First MMP on ChatGPT"<span class="ref-url">singular.net/blog/singular-chatgpt-mcp</span></a>
+              <a class="ref-link" href="https://www.kochava.com/blog/integrative-ai-for-marketers-with-kochava-mcps-in-stationone/" target="_blank"><strong>Kochava StationOne</strong> &mdash; 자체 AI 허브 + 모델 독립<span class="ref-url">kochava.com/blog/.../kochava-mcps-in-stationone</span></a>
+              <a class="ref-link" href="https://github.com/bitscorp/mcp-adjust" target="_blank"><strong>Adjust (비공식)</strong> &mdash; 커뮤니티 MCP<span class="ref-url">github.com/bitscorp/mcp-adjust</span></a>
+              <a class="ref-link" href="https://www.youtube.com/watch?v=Fw_GLvzKkq0" target="_blank"><strong>Singular MCP 데모 영상</strong> &mdash; ChatGPT MCP 실전 사용 &#127909;<span class="ref-url">youtube.com/watch?v=Fw_GLvzKkq0</span></a>
+              <a class="ref-link" href="https://www.youtube.com/watch?v=8lWokh8fneE&amp;list=PLTkWFRcH27jzj-XPLvkMt4uik4UrHpWku&amp;index=1" target="_blank"><strong>AppsFlyer MCP 데모 영상</strong> &mdash; Claude 연동 실전 사용 &#127909;<span class="ref-url">youtube.com/watch?v=8lWokh8fneE</span></a>
+              <a class="ref-link" href="https://www.kochava.com/stationone/" target="_blank"><strong>Kochava StationOne 페이지</strong> &mdash; 자체 AI 데스크탑 앱<span class="ref-url">kochava.com/stationone</span></a>
+            </div>
+          </div>
+          <!-- 보안 & 프로토콜 비교 -->
+          <div class="card" style="padding:16px;border-top:2px solid var(--amber)">
+            <h3 style="font-size:0.82rem;margin-bottom:10px">&#128293; 보안 &amp; 프로토콜 비교</h3>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <a class="ref-link" href="https://simonwillison.net/2025/Apr/9/mcp-prompt-injection/" target="_blank"><strong>Prompt Injection (Willison)</strong> &mdash; MCP 보안의 바이블 &#11088;<span class="ref-url">simonwillison.net/2025/Apr/9/mcp-prompt-injection</span></a>
+              <a class="ref-link" href="https://prompt.security/blog/top-10-mcp-security-risks" target="_blank"><strong>Top 10 MCP 보안 리스크</strong> &mdash; OWASP 스타일 체크리스트 &#11088;<span class="ref-url">prompt.security/blog/top-10-mcp-security-risks</span></a>
+              <a class="ref-link" href="https://unit42.paloaltonetworks.com/model-context-protocol-attack-vectors/" target="_blank"><strong>Palo Alto Unit42</strong> &mdash; Sampling 공격 PoC 연구<span class="ref-url">unit42.paloaltonetworks.com/.../attack-vectors</span></a>
+              <a class="ref-link" href="https://zilliz.com/blog/function-calling-vs-mcp-vs-a2a-developers-guide-to-ai-agent-protocols" target="_blank"><strong>FC vs MCP vs A2A (Zilliz)</strong> &mdash; 3대 프로토콜 비교 &#11088;<span class="ref-url">zilliz.com/blog/function-calling-vs-mcp-vs-a2a</span></a>
+              <a class="ref-link" href="https://google.github.io/A2A" target="_blank"><strong>A2A Protocol (Google)</strong> &mdash; Agent-to-Agent, MCP 보완<span class="ref-url">google.github.io/A2A</span></a>
+            </div>
+          </div>
+          <!-- 마케팅 활용 & 엔터프라이즈 -->
+          <div class="card" style="padding:16px;border-top:2px solid var(--blue)">
+            <h3 style="font-size:0.82rem;margin-bottom:10px">&#129302; 마케팅 &amp; 엔터프라이즈</h3>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <a class="ref-link" href="https://block.github.io/goose/blog/2025/04/21/mcp-in-enterprise/" target="_blank"><strong>Block MCP 도입기</strong> &mdash; 50-75% 시간 절감 실전 사례 &#11088;<span class="ref-url">block.github.io/goose/blog/.../mcp-in-enterprise</span></a>
+              <a class="ref-link" href="https://www.dataslayer.ai/blog/mcp-use-cases-for-marketing-teams" target="_blank"><strong>마케팅 팀 MCP 사례 7가지</strong> &mdash; 4시간&rarr;4분 시간 절감 &#11088;<span class="ref-url">dataslayer.ai/blog/mcp-use-cases-for-marketing-teams</span></a>
+              <a class="ref-link" href="https://www.elastic.co/search-labs/blog/mcp-current-state" target="_blank"><strong>MCP 현황 (Elastic)</strong> &mdash; 최신 스펙 + 보안 과제 정리<span class="ref-url">elastic.co/search-labs/blog/mcp-current-state</span></a>
+              <a class="ref-link" href="https://www.youtube.com/watch?v=JZW2W5rwsD4" target="_blank"><strong>"MCP is DEAD" 영상</strong> &mdash; 컨텍스트 소비 한계 분석<span class="ref-url">youtube.com/watch?v=JZW2W5rwsD4</span></a>
+              <a class="ref-link" href="https://www.notion.so/ab180/3792-Airbridge-MCP-2f4a69a8250780cbb129f14eaaf02d64" target="_blank"><strong>Airbridge MCP PRD</strong> &mdash; (내부) Notion #3792<span class="ref-url">notion.so/ab180/3792-Airbridge-MCP</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ CLOSING ══════════════ -->
+    <section class="slide">
+      <div class="slide-inner" style="text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 120px)">
+        <div class="stagger"><span class="cover-badge"><span class="dot"></span> CLOSING</span></div>
+        <h1 class="cover-title stagger" style="font-size:clamp(2rem,4.5vw,3.5rem)">에어브릿지의<br/>데이터 파이프라인을<br/><span class="accent">지혜의 파이프라인</span>으로</h1>
+        <div class="stagger" style="margin-top:28px;display:flex;flex-direction:column;gap:10px;max-width:500px;text-align:left;width:100%">
+          <div class="card" style="padding:12px 20px"><p style="font-size:0.85rem;color:var(--ink)"><strong class="text-blue">PART 01</strong> &mdash; MCP는 LLM의 "데이터 맹점"을 해결하는 <strong class="text-cyan">표준 프로토콜</strong></p></div>
+          <div class="card" style="padding:12px 20px"><p style="font-size:0.85rem;color:var(--ink)"><strong class="text-violet">PART 02</strong> &mdash; Data &rarr; Wisdom은 <strong class="text-cyan">큰 팀만 가능했던 일</strong> &mdash; Agent가 바꾼다</p></div>
+          <div class="card" style="padding:12px 20px"><p style="font-size:0.85rem;color:var(--ink)"><strong class="text-cyan">PART 03</strong> &mdash; Airbridge MCP로 마케터를 <strong class="text-cyan">성장 전략가</strong>로 전환</p></div>
+          <div class="card" style="padding:12px 20px"><p style="font-size:0.85rem;color:var(--ink)"><strong style="color:var(--rose)">PART 04</strong> &mdash; 주요 MMP 모두 AI 연동 중 &mdash; <strong class="text-cyan">후발 주자의 이점</strong>으로 승부</p></div>
+          <div class="card" style="padding:12px 20px"><p style="font-size:0.85rem;color:var(--ink)"><strong class="text-amber">PART 05</strong> &mdash; MCP 만능은 아니다 &mdash; <strong class="text-cyan">MCP + Skills + API + CLI</strong> 상황에 맞는 선택이 필요</p></div>
+        </div>
+        <svg class="cover-geo" viewBox="0 0 440 440" style="opacity:0.05"><circle cx="220" cy="220" r="200"/><circle cx="220" cy="220" r="140"/><circle cx="220" cy="220" r="80"/></svg>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Keyboard hint -->
+  <div class="kb-hint"><kbd>&larr;</kbd> <kbd>&rarr;</kbd> or <kbd>Space</kbd> to navigate</div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    let cur = 0;
+    const total = slides.length;
+
+    document.getElementById('totalPages').textContent = total;
+    updateCounter();
+
+    function go(i) {
+      if (i < 0 || i >= total) return;
+      slides[cur].classList.remove('active');
+      cur = i;
+      slides[cur].classList.add('active');
+      updateCounter();
+    }
+
+    function updateCounter() {
+      document.getElementById('navCounter').textContent = (cur + 1) + ' / ' + total;
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); go(cur + 1); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); go(cur - 1); }
+      if (e.key === 'Home') go(0);
+      if (e.key === 'End') go(total - 1);
+    });
+
+    // Touch support
+    let touchX = 0;
+    document.addEventListener('touchstart', e => touchX = e.touches[0].clientX);
+    document.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - touchX;
+      if (Math.abs(dx) > 50) dx < 0 ? go(cur + 1) : go(cur - 1);
+    });
+
+  </script>
+</body>
+</html>
